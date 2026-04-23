@@ -524,6 +524,361 @@ views['chat-haebit'] = () => `
   </div>
 `;
 
+// ─── Haebit: 신청서 다운로드 (진단 결과 자동 key-in) ─
+function haebitDownloadApplication() {
+  const a = state.haebit.answers || {};
+  const s = computeSummary();
+  const parcelIds = a.parcels || [];
+  const parcelList = parcelIds.map(id => MOCK_PARCELS.find(p => p.id === id)).filter(Boolean);
+  const parcelNames = parcelList.map(p => p.label).join(', ') || '—';
+  const landUseMix = (() => {
+    const counts = {};
+    parcelList.forEach(p => counts[p.use] = (counts[p.use] || 0) + 1);
+    return Object.entries(counts).map(([k,v]) => `${k} ${v}필지`).join(', ') || '—';
+  })();
+  const pyeong = Math.round(s.totalArea / 3.3).toLocaleString();
+  const consentLabel = { high:'대다수 찬성 · 의견 수렴 완료', mid:'일부 반대 · 추가 소통 필요', low:'아직 협의 전 · 공청회 필요', conflict:'갈등 진행 중 · 중재 필요' }[a.consent] || '미정';
+
+  const addr = a.addr || '전남 곡성군 고달면 두가리 산 23-1';
+  const emdFromAddr = (addr.match(/([가-힣]+면|[가-힣]+읍|[가-힣]+동)/) || [])[1] || '고달면';
+  const projectName = `곡성군 ${emdFromAddr} ${s.capMW}MW 햇빛소득마을`;
+
+  const today = (() => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+  const y = new Date().getFullYear();
+  const appNo = `HS-${y}-${Math.floor(Math.random()*9000+1000)}`;
+
+  const doc = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>햇빛소득마을 설치 지원사업 신청서 — ${projectName}</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; color: #1E293B; line-height: 1.55; max-width: 820px; margin: 0 auto; padding: 40px 20px; }
+  header { border-bottom: 3px solid #1E40AF; padding-bottom: 18px; margin-bottom: 28px; display: flex; align-items: flex-end; gap: 18px; }
+  header .brand { width: 54px; height: 54px; background: linear-gradient(135deg, #1E40AF 0%, #0B1F3A 100%); color: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; letter-spacing: 0.05em; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #0F172A; }
+  header .s { font-size: 12.5px; color: #64748B; margin-top: 3px; }
+  header .meta { margin-left: auto; text-align: right; font-size: 11.5px; color: #475569; }
+  header .meta strong { display: block; font-size: 13px; color: #0F172A; font-family: 'Courier New', monospace; letter-spacing: 0.05em; }
+  .notice { padding: 12px 16px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; font-size: 12px; color: #1E40AF; margin-bottom: 24px; }
+  section { margin-bottom: 22px; }
+  h2 { font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.2px; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid #E2E8F0; }
+  h2 .badge { display: inline-block; font-size: 10px; font-weight: 600; background: #F1F5F9; color: #64748B; padding: 1px 7px; border-radius: 4px; margin-left: 6px; letter-spacing: 0; }
+  table.kv { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.kv th { width: 160px; text-align: left; padding: 8px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; font-weight: 600; color: #475569; letter-spacing: -0.1px; }
+  table.kv td { padding: 8px 12px; border: 1px solid #E2E8F0; color: #0F172A; }
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 10px; }
+  .kpi .c { padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC; }
+  .kpi .l { font-size: 10.5px; color: #64748B; letter-spacing: 0.05em; text-transform: uppercase; }
+  .kpi .v { font-size: 18px; font-weight: 800; color: #0F172A; margin-top: 2px; letter-spacing: -0.5px; }
+  .kpi .v span { font-size: 11px; font-weight: 500; color: #64748B; margin-left: 2px; }
+  .kpi .s { font-size: 10.5px; color: #64748B; margin-top: 2px; }
+  ul.chk { padding: 0; margin: 0; list-style: none; column-count: 2; column-gap: 14px; font-size: 12px; }
+  ul.chk li { padding: 4px 0; break-inside: avoid; }
+  ul.chk li::before { content: "☐ "; color: #94A3B8; margin-right: 4px; }
+  .tl { padding: 0; margin: 0; list-style: none; font-size: 12.5px; }
+  .tl li { padding: 6px 0; border-bottom: 1px dashed #E2E8F0; display: flex; justify-content: space-between; }
+  .tl li strong { color: #1E40AF; font-family: 'Courier New', monospace; font-size: 11.5px; }
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E2E8F0; font-size: 11px; color: #64748B; line-height: 1.6; }
+  .sig { margin-top: 28px; display: flex; justify-content: flex-end; gap: 40px; font-size: 12px; }
+  .sig .box { border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 16px; min-width: 160px; }
+  .sig .box .l { color: #64748B; font-size: 10.5px; }
+  .sig .box .v { font-weight: 600; color: #0F172A; margin-top: 6px; font-size: 13px; }
+  .print-bar { position: sticky; top: 0; background: #FEF3C7; border: 1px solid #F59E0B; padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 12px; color: #78350F; display: flex; justify-content: space-between; align-items: center; }
+  .print-bar button { background: #92400E; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  @media print { .print-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  💡 <span>이 창을 PDF로 저장하려면 <strong>Ctrl+P</strong> → "PDF로 저장" 을 선택하세요.</span>
+  <button onclick="window.print()">프린트 / PDF 저장</button>
+</div>
+
+<header>
+  <div class="brand">RE</div>
+  <div>
+    <h1>햇빛소득마을 설치 지원사업 신청서</h1>
+    <div class="s">산업통상자원부 · 한국에너지공단 · 주민참여형 재생에너지</div>
+  </div>
+  <div class="meta">
+    접수번호<br><strong>${appNo}</strong>
+    <div style="margin-top:6px;">작성일 ${today}</div>
+  </div>
+</header>
+
+<div class="notice">
+  ℹ 본 신청서는 <strong>햇빛소득 진단 결과를 기반으로 자동 key-in 된 초안</strong>입니다.
+  제출 전 담당자 검토 및 첨부서류 준비가 필요합니다.
+</div>
+
+<section>
+  <h2>1. 신청 정보</h2>
+  <table class="kv">
+    <tr><th>신청 구분</th><td>주민참여형 · 군민조합형</td></tr>
+    <tr><th>신청자 (대표)</th><td>${state.user?.name || '윤태환'}</td></tr>
+    <tr><th>연락처</th><td>010-****-8721</td></tr>
+    <tr><th>이메일</th><td>${state.user?.kakaoId || 'juns****@kakao.com'}</td></tr>
+    <tr><th>조합명</th><td>곡성군민에너지협동조합 (준조합원)</td></tr>
+    <tr><th>주민 인증</th><td>✓ PASS 본인확인 · 거주지 증빙 완료 (곡성군)</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>2. 사업 개요</h2>
+  <table class="kv">
+    <tr><th>사업명</th><td><strong>${projectName}</strong></td></tr>
+    <tr><th>사업장 주소</th><td>${addr}</td></tr>
+    <tr><th>발전 형태</th><td>태양광 (지상형)</td></tr>
+    <tr><th>사업 유형</th><td>군민조합 + 펀드형</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>3. 부지 현황 <span class="badge">자동 조회 · VWORLD·농지은행</span></h2>
+  <table class="kv">
+    <tr><th>선택 필지 (${parcelIds.length}필지)</th><td>${parcelNames}</td></tr>
+    <tr><th>합산 면적</th><td>${s.totalArea.toLocaleString()} ㎡ (약 ${pyeong}평)</td></tr>
+    <tr><th>토지 이용</th><td>${landUseMix}</td></tr>
+    <tr><th>경사도</th><td>평균 4° (양호)</td></tr>
+    <tr><th>규제 검토</th><td>계획관리지역 일부 포함 · 세부검토 필요 / 농업진흥·산림보전·문화재·상수원 보호구역 해당 없음</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>4. 사업 규모 및 재원 계획</h2>
+  <div class="kpi">
+    <div class="c"><div class="l">설비 용량</div><div class="v">${s.capMW}<span>MW</span></div><div class="s">${s.capKW.toLocaleString()} kW</div></div>
+    <div class="c"><div class="l">총 사업비</div><div class="v">${s.costEok}<span>억원</span></div><div class="s">1MW ≈ 14억</div></div>
+    <div class="c"><div class="l">연간 수익</div><div class="v">${s.revEok}<span>억원</span></div><div class="s">SMP + REC</div></div>
+    <div class="c"><div class="l">군민펀드 목표</div><div class="v">${s.fundEok}<span>억원</span></div><div class="s">총사업비의 약 ${Math.round(s.fundEok/parseFloat(s.costEok)*100)}%</div></div>
+  </div>
+  <table class="kv">
+    <tr><th>연간 발전량</th><td>약 ${Math.round(parseFloat(s.capMW)*1380).toLocaleString()} MWh</td></tr>
+    <tr><th>REC 가중치</th><td>+0.2 (주민참여 조건 · 인접주민 ≥ 40%)</td></tr>
+    <tr><th>자기자본 : 차입</th><td>20 : 80 (프로젝트 파이낸싱)</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>5. 기술 검토 <span class="badge">기상청·한전 자동 조회</span></h2>
+  <table class="kv">
+    <tr><th>연 평균 일사량</th><td>3.82 kWh/㎡·일 (국내 평균 95%)</td></tr>
+    <tr><th>연간 발전시간</th><td>약 1,380시간</td></tr>
+    <tr><th>가까운 변전소</th><td>옥과 154kV (3.2km)</td></tr>
+    <tr><th>잔여 접속 용량</th><td>14.7 MW · 접속 가능</td></tr>
+    <tr><th>계통 연계 방식</th><td>22.9kV 배전선로 접속</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>6. 주민 참여 계획</h2>
+  <table class="kv">
+    <tr><th>주민 수용성</th><td>${consentLabel}</td></tr>
+    <tr><th>인접주민 참여 목표</th><td>60%</td></tr>
+    <tr><th>군민 출자 목표</th><td>약 500명</td></tr>
+    <tr><th>1인 출자 범위</th><td>50만원 ~ 1,000만원</td></tr>
+    <tr><th>배당 수령 방식</th><td>곡성사랑상품권 (+3% 가산 · 지역화폐 API 연동)</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>7. 사업 일정 (예정)</h2>
+  <ul class="tl">
+    <li>설계 / 환경성 검토<strong>${y+0}.06 ~ ${y+0}.09</strong></li>
+    <li>인허가 · 주민설명회<strong>${y+0}.10 ~ ${y+1}.01</strong></li>
+    <li>군민펀드 모집<strong>${y+1}.01 ~ ${y+1}.03</strong></li>
+    <li>착공<strong>${y+1}.02</strong></li>
+    <li>준공 · 상업운전<strong>${y+1}.11</strong></li>
+  </ul>
+</section>
+
+<section>
+  <h2>8. 첨부서류 체크리스트</h2>
+  <ul class="chk">
+    <li>부지 토지등기부등본 (필지별)</li>
+    <li>지적도 / 임야도</li>
+    <li>사업자등록증 (군민조합)</li>
+    <li>정관 · 이사회 의결서</li>
+    <li>주민 동의서 (인접주민 ≥ 40%)</li>
+    <li>계통 접속 협의 확인서 (한전)</li>
+    <li>환경성 검토 결과 (해당 시)</li>
+    <li>재원 조달 계획서</li>
+  </ul>
+</section>
+
+<div class="sig">
+  <div class="box"><div class="l">신청자</div><div class="v">${state.user?.name || '윤태환'} (서명)</div></div>
+  <div class="box"><div class="l">곡성군 에너지팀 확인</div><div class="v">(담당자 날인)</div></div>
+</div>
+
+<footer>
+  본 신청서는 「재생에너지 주민참여사업 운영지침」 및 「햇빛소득마을 지원사업 운영기준」에 따라 접수됩니다.<br>
+  접수 후 14일 이내 보완 요청 또는 수리 여부가 안내되며, 허위 기재 시 선정이 취소될 수 있습니다.<br>
+  <strong>에너지히어로 (by 루트에너지)</strong> · 곡성군 파일럿 1호 · ${today}
+</footer>
+
+</body>
+</html>`;
+
+  // Blob → download
+  const fname = `햇빛소득마을_신청서_${appNo}_${emdFromAddr}_${s.capMW}MW.html`;
+  const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = fname;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  // 새 탭에서 바로 미리보기 열기
+  const preview = window.open();
+  if (preview) preview.document.write(doc);
+}
+
+// (이전에 있던 views['haebit-apply'] 는 제거됨 — 이제는 함수가 바로 파일을 다운로드)
+/*
+          <div><span>신청 번호</span><strong>HS-${y}-${Math.floor(Math.random()*9000+1000)}</strong></div>
+          <div><span>작성일</span><strong>${today}</strong></div>
+          <div><span>상태</span><span class="badge bd-warn">진단 기반 자동 작성</span></div>
+        </div>
+      </div>
+
+      <div class="ha-notice">
+        ℹ 아래 양식은 <strong>햇빛 진단 결과를 기반으로 자동 key-in 된 초안</strong>입니다.
+        필요하면 직접 수정하시고, <strong>제출</strong>하면 곡성군 에너지팀과 한국에너지공단에 접수돼요.
+      </div>
+
+      <!-- Section 1 · 신청 정보 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">1. 신청 정보</div>
+        <div class="ha-grid2">
+          <div class="ha-field"><label>신청 구분</label><input value="주민참여형 · 군민조합형" /></div>
+          <div class="ha-field"><label>신청자 (대표)</label><input value="${state.user?.name || '윤태환'}" /></div>
+          <div class="ha-field"><label>연락처</label><input value="010-****-8721" /></div>
+          <div class="ha-field"><label>이메일</label><input value="${state.user?.kakaoId || 'juns****@kakao.com'}" /></div>
+          <div class="ha-field"><label>조합명 (있을 경우)</label><input value="곡성군민에너지협동조합 (준조합원)" /></div>
+          <div class="ha-field"><label>주민 인증</label><input value="✓ PASS 본인확인 · 거주지 증빙 완료 (곡성군)" readonly class="ro" /></div>
+        </div>
+      </section>
+
+      <!-- Section 2 · 사업 개요 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">2. 사업 개요</div>
+        <div class="ha-grid2">
+          <div class="ha-field ha-field-lg"><label>사업명</label><input value="${projectName}" /></div>
+          <div class="ha-field ha-field-lg"><label>사업장 주소</label><input value="${addr}" /></div>
+          <div class="ha-field"><label>발전 형태</label><input value="태양광 (지상형)" /></div>
+          <div class="ha-field"><label>사업 유형</label><input value="군민조합 + 펀드형" /></div>
+        </div>
+      </section>
+
+      <!-- Section 3 · 부지 현황 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">3. 부지 현황 <span class="ha-badge">자동 조회 · VWORLD·농지은행</span></div>
+        <div class="ha-grid2">
+          <div class="ha-field ha-field-lg"><label>선택 필지 (${parcelIds.length}필지)</label><input value="${parcelNames}" /></div>
+          <div class="ha-field"><label>합산 면적</label><input value="${s.totalArea.toLocaleString()} ㎡ (약 ${pyeong}평)" /></div>
+          <div class="ha-field"><label>토지 이용</label><input value="${landUseMix}" /></div>
+          <div class="ha-field"><label>경사도</label><input value="평균 4° (양호)" /></div>
+          <div class="ha-field"><label>규제 검토 결과</label><input value="계획관리지역 일부 포함 · 세부검토 필요 / 기타 해당 없음" /></div>
+        </div>
+      </section>
+
+      <!-- Section 4 · 사업 규모 & 재원 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">4. 사업 규모 및 재원 계획</div>
+        <div class="ha-kpi">
+          <div class="ha-kpi-cell"><div class="l">설비 용량</div><div class="v">${s.capMW}<span>MW</span></div><div class="s">${s.capKW.toLocaleString()} kW</div></div>
+          <div class="ha-kpi-cell"><div class="l">총 사업비</div><div class="v">${s.costEok}<span>억원</span></div><div class="s">1MW ≈ 14억 기준</div></div>
+          <div class="ha-kpi-cell"><div class="l">연간 수익</div><div class="v">${s.revEok}<span>억원</span></div><div class="s">SMP + REC 기준</div></div>
+          <div class="ha-kpi-cell"><div class="l">군민펀드 조성 목표</div><div class="v">${s.fundEok}<span>억원</span></div><div class="s">총사업비의 약 ${Math.round(s.fundEok/parseFloat(s.costEok)*100)}%</div></div>
+        </div>
+        <div class="ha-grid2" style="margin-top:14px;">
+          <div class="ha-field"><label>예상 연 발전량</label><input value="${Math.round(parseFloat(s.capMW)*1380).toLocaleString()} MWh/년" /></div>
+          <div class="ha-field"><label>REC 가중치 (주민참여)</label><input value="+0.2 (인접주민 ≥ 40% 조건 충족 시)" /></div>
+          <div class="ha-field"><label>자기자본 비율</label><input value="20%" /></div>
+          <div class="ha-field"><label>차입 비율</label><input value="80% (프로젝트 파이낸싱)" /></div>
+        </div>
+      </section>
+
+      <!-- Section 5 · 기술 검토 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">5. 기술 검토 <span class="ha-badge">기상청 · 한전 자동 조회</span></div>
+        <div class="ha-grid2">
+          <div class="ha-field"><label>연 평균 일사량</label><input value="3.82 kWh/㎡·일" /></div>
+          <div class="ha-field"><label>국내 평균 대비</label><input value="약 95%" /></div>
+          <div class="ha-field"><label>연간 발전 시간</label><input value="약 1,380시간" /></div>
+          <div class="ha-field"><label>가까운 변전소</label><input value="옥과 154kV (3.2km)" /></div>
+          <div class="ha-field"><label>잔여 접속 용량</label><input value="14.7 MW · 접속 가능" /></div>
+          <div class="ha-field"><label>계통 연계 방식</label><input value="22.9kV 배전선로 접속" /></div>
+        </div>
+      </section>
+
+      <!-- Section 6 · 주민 참여 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">6. 주민 참여 계획</div>
+        <div class="ha-grid2">
+          <div class="ha-field ha-field-lg"><label>주민 수용성 (현재)</label><input value="${consentLabel}" /></div>
+          <div class="ha-field"><label>인접주민 (500m) 참여 목표</label><input value="60%" /></div>
+          <div class="ha-field"><label>군민 출자 목표 인원</label><input value="약 500명" /></div>
+          <div class="ha-field"><label>배당 수령 방식</label><input value="곡성사랑상품권 (+3% 가산 · 지역화폐 API 연동)" /></div>
+          <div class="ha-field"><label>1인 최소 출자</label><input value="50만원" /></div>
+          <div class="ha-field"><label>1인 최대 출자</label><input value="1,000만원" /></div>
+        </div>
+      </section>
+
+      <!-- Section 7 · 일정 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">7. 사업 일정 (예정)</div>
+        <div class="ha-timeline">
+          <div class="ha-t"><div class="ha-t-k">설계 / 환경성 검토</div><div class="ha-t-v">${y+0}.06 ~ ${y+0}.09</div></div>
+          <div class="ha-t"><div class="ha-t-k">인허가 · 주민설명회</div><div class="ha-t-v">${y+0}.10 ~ ${y+1}.01</div></div>
+          <div class="ha-t"><div class="ha-t-k">군민펀드 모집</div><div class="ha-t-v">${y+1}.01 ~ ${y+1}.03</div></div>
+          <div class="ha-t"><div class="ha-t-k">착공</div><div class="ha-t-v">${y+1}.02</div></div>
+          <div class="ha-t"><div class="ha-t-k">준공 · 상업운전</div><div class="ha-t-v">${y+1}.11</div></div>
+        </div>
+      </section>
+
+      <!-- Section 8 · 첨부서류 -->
+      <section class="ha-sec">
+        <div class="ha-sec-tt">8. 첨부서류 체크리스트</div>
+        <div class="ha-chk-grid">
+          <label class="ha-chk"><input type="checkbox" checked>부지 토지등기부등본 (필지별)</label>
+          <label class="ha-chk"><input type="checkbox" checked>지적도 / 임야도</label>
+          <label class="ha-chk"><input type="checkbox">사업자등록증 (군민조합)</label>
+          <label class="ha-chk"><input type="checkbox">정관 · 이사회 의결서</label>
+          <label class="ha-chk"><input type="checkbox">주민 동의서 (인접주민 ≥ 40%)</label>
+          <label class="ha-chk"><input type="checkbox">계통 접속 협의 확인서 (한전)</label>
+          <label class="ha-chk"><input type="checkbox">환경성 검토 결과 (해당 시)</label>
+          <label class="ha-chk"><input type="checkbox">재원 조달 계획서</label>
+        </div>
+      </section>
+
+      <!-- 푸터 액션 -->
+      <div class="ha-foot">
+        <button class="btn-ghost" onclick="go('chat-haebit')">← 진단으로 돌아가기</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="haebitSaveDraft()">📂 임시저장</button>
+          <button class="btn-ghost" onclick="haebitDownloadPdf()">📄 PDF 다운로드</button>
+          <button class="btn-primary" onclick="haebitSubmitApplication()">곡성군 · 에너지공단으로 제출 ▸</button>
+        </div>
+      </div>
+
+      <div class="ha-legal">
+        본 신청서는 「재생에너지 주민참여사업 운영지침」 및 「햇빛소득마을 지원사업 운영기준」에 따라 접수됩니다.
+        · 접수 후 14일 이내 보완 요청 또는 수리 여부 안내 · 허위 기재 시 선정 취소될 수 있습니다.
+      </div>
+    </div>
+  </div>
+  `;
+};
+
+*/
+
 // ─── Coop: 내 조합 (주민 뷰) ──────────────
 views.coop = () => `
   <div class="stack">
@@ -1220,7 +1575,8 @@ function askHaebitStep() {
       <p style="margin-top:12px;"><strong>다음 단계 추천</strong></p>
       <ul><li>곡성군 에너지팀 상담 예약</li><li>루트에너지 전문가 연결</li><li>주민 설명회 지원 요청</li></ul>
       <div class="quick-pills">
-        <button class="qp" onclick="go('coop')">협동조합 가입 ▸</button>
+        <button class="qp qp-primary" onclick="haebitDownloadApplication()">📄 햇빛소득마을 신청서 다운로드</button>
+        <button class="qp" onclick="go('coop')">협동조합 가입</button>
         <button class="qp" onclick="resetHaebit()">다시 진단하기</button>
       </div>
     `;
