@@ -62,9 +62,157 @@
     padding: 4px 12px; border-radius: 100px; margin-right: 8px;
     font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em;
   }
-  .bh-level-badge.guest  { background: var(--ink-100); color: var(--ink-700); }
-  .bh-level-badge.member { background: #DCFCE7;       color: #166534; }
-  .bh-level-badge.admin  { background: #FEF3C7;       color: #92400E; }
+  .bh-level-badge.guest   { background: var(--ink-100); color: var(--ink-700); }
+  .bh-level-badge.member  { background: #DCFCE7;       color: #166534; }
+  .bh-level-badge.chair   { background: #F3E8FF;       color: #6D28D9; }
+  .bh-level-badge.auditor { background: #E0F2FE;       color: #0369A1; }
+  .bh-level-badge.admin   { background: #FEF3C7;       color: #92400E; }
+
+  /* ── 배당 승인 카드 (chair / auditor) ───────── */
+  .apv-card {
+    padding: 22px 26px; background: linear-gradient(135deg, #fff 0%, #fefce8 100%);
+    border: 1px solid #fde68a; border-radius: 14px; margin-bottom: 16px;
+  }
+  .apv-hd {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--ink-100);
+  }
+  .apv-role-badge {
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+  }
+  .apv-role-badge.chair   { background: #F3E8FF; color: #6D28D9; }
+  .apv-role-badge.auditor { background: #E0F2FE; color: #0369A1; }
+  .apv-title { font-size: 16px; font-weight: 700; color: var(--ink-900); letter-spacing: -0.3px; }
+  .apv-sub { font-size: 12px; color: var(--ink-500); margin-top: 2px; }
+
+  .apv-kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin-bottom: 14px; }
+  .apv-kv .k { font-size: 11px; color: var(--ink-500); letter-spacing: 0.04em; text-transform: uppercase; }
+  .apv-kv .v { font-size: 15px; font-weight: 700; color: var(--ink-900); margin-top: 2px; }
+  .apv-kv .v.lg { font-size: 22px; letter-spacing: -0.5px; }
+
+  .apv-state {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 8px; background: var(--ink-50);
+    font-size: 12px; margin-bottom: 14px;
+  }
+  .apv-state .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+  .apv-state .dot.done { background: var(--ok); }
+
+  .apv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+  .apv-btn-primary {
+    padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: -0.2px;
+    background: var(--blue-700); color: #fff;
+    box-shadow: 0 4px 12px rgba(29,78,216,0.22);
+  }
+  .apv-btn-primary.chair   { background: #6D28D9; box-shadow: 0 4px 12px rgba(109,40,217,0.28); }
+  .apv-btn-primary.auditor { background: #0369A1; box-shadow: 0 4px 12px rgba(3,105,161,0.28); }
+  .apv-btn-primary:disabled { background: var(--ink-200); color: var(--ink-400); cursor: not-allowed; box-shadow: none; }
+
+  .apv-waiting {
+    padding: 32px; text-align: center; background: var(--ink-50);
+    border-radius: 12px; color: var(--ink-500); font-size: 13px;
+  }
+  .apv-waiting .ic { font-size: 32px; opacity: 0.35; margin-bottom: 8px; }
+  .apv-done-banner {
+    padding: 14px 18px; background: #ecfdf5; border: 1px solid #a7f3d0;
+    border-radius: 10px; color: #065F46; font-size: 12.5px; font-weight: 600;
+    margin-top: 14px;
+  }
+
+  .apv-log {
+    margin-top: 14px; padding: 12px 16px; background: var(--ink-25);
+    border-radius: 10px; font-size: 11.5px; color: var(--ink-500);
+    border: 1px solid var(--ink-100);
+  }
+  .apv-log-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .apv-log-row .tx { font-family: 'IBM Plex Mono', monospace; color: var(--ink-400); font-size: 10.5px; }
+
+  /* 조합원 명부 차단 안내 */
+  .bh-gate {
+    padding: 48px 32px; text-align: center;
+    background: var(--ink-25); border: 1px dashed var(--ink-200); border-radius: 14px;
+  }
+  .bh-gate .ic { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .bh-gate .t { font-size: 16px; font-weight: 700; color: var(--ink-900); margin-bottom: 6px; }
+  .bh-gate .s { font-size: 12.5px; color: var(--ink-500); margin-bottom: 20px; }
+
+  /* ── Standard / Premium 플랜 비교 ───────────── */
+  .plan-hd {
+    padding: 20px 24px; background: linear-gradient(135deg, #0b1f3a 0%, #1e40af 100%);
+    color: #fff; border-radius: 14px 14px 0 0;
+  }
+  .plan-hd h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .plan-hd p { margin: 6px 0 0; color: #bfdbfe; font-size: 13px; }
+
+  .plan-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    background: var(--ink-100); border: 1px solid var(--ink-100);
+    border-top: none; border-radius: 0 0 14px 14px; overflow: hidden;
+  }
+  .plan-col { background: #fff; padding: 24px 26px; }
+  .plan-col.premium {
+    background: linear-gradient(180deg, #fafbff 0%, #eff6ff 100%);
+    position: relative;
+  }
+  .plan-col.premium::before {
+    content: 'PREMIUM'; position: absolute; top: 18px; right: 24px;
+    background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+    color: #fff; padding: 3px 10px; border-radius: 100px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+    box-shadow: 0 2px 8px rgba(220,38,38,0.2);
+  }
+  .plan-col h3 {
+    margin: 0 0 4px; font-size: 24px; font-weight: 800;
+    color: var(--ink-900); letter-spacing: -0.5px;
+  }
+  .plan-col .sub { font-size: 12px; color: var(--ink-500); margin-bottom: 16px; }
+  .plan-col .price {
+    font-size: 14px; color: var(--ink-700); margin-bottom: 20px;
+    padding: 10px 12px; background: var(--ink-50); border-radius: 8px;
+  }
+  .plan-col.premium .price { background: #fff; border: 1px solid #bfdbfe; }
+  .plan-col .price strong { font-size: 18px; font-weight: 800; color: var(--blue-700); }
+
+  .plan-feats { list-style: none; padding: 0; margin: 0; }
+  .plan-feats li {
+    display: flex; gap: 10px; padding: 10px 0;
+    border-bottom: 1px dashed var(--ink-100); font-size: 13px; line-height: 1.5;
+  }
+  .plan-feats li:last-child { border-bottom: none; }
+  .plan-feats .ck {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--ok); color: #fff; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .plan-feats .ck.x { background: var(--ink-200); }
+  .plan-feats .meta { flex: 1; color: var(--ink-700); }
+  .plan-feats .meta strong { color: var(--ink-900); }
+  .plan-feats .meta .note { font-size: 11.5px; color: var(--ink-500); margin-top: 2px; display: block; }
+
+  .plan-flow {
+    margin-top: 16px; padding: 14px 16px; background: var(--ink-25);
+    border-radius: 10px; font-size: 11.5px; color: var(--ink-600);
+    font-family: 'IBM Plex Mono', monospace; line-height: 1.7;
+  }
+  .plan-flow strong { color: var(--blue-700); }
+
+  /* 플랜 스위처 (join-payment 에서 사용) */
+  .plan-toggle {
+    display: inline-flex; gap: 4px; padding: 4px;
+    background: var(--ink-50); border-radius: 100px; margin-bottom: 14px;
+  }
+  .plan-toggle button {
+    padding: 6px 14px; border: none; background: transparent;
+    border-radius: 100px; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 600; color: var(--ink-500);
+  }
+  .plan-toggle button.on {
+    background: #fff; color: var(--blue-700);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
 
   /* ── 가입 플로우 공통 ───────────────────────── */
   .jn-progress {
@@ -297,15 +445,23 @@
     <div class="bh-levelsim">
       <div class="bh-levelsim-t">계정 레벨 시뮬레이터</div>
       <div class="bh-levels" id="bh-levels">
-        <button data-lv="guest"  onclick="bhSwitchLevel('guest')">
+        <button data-lv="guest"   onclick="bhSwitchLevel('guest')">
           <span class="ic">👤</span>
           <span class="meta"><span class="n">비회원</span><span class="s">초대코드 받음 상태</span></span>
         </button>
-        <button data-lv="member" onclick="bhSwitchLevel('member')">
+        <button data-lv="member"  onclick="bhSwitchLevel('member')">
           <span class="ic">🤝</span>
           <span class="meta"><span class="n">조합원</span><span class="s">가입·출자금 납부 완료</span></span>
         </button>
-        <button data-lv="admin"  onclick="bhSwitchLevel('admin')">
+        <button data-lv="chair"   onclick="bhSwitchLevel('chair')">
+          <span class="ic">👑</span>
+          <span class="meta"><span class="n">조합장</span><span class="s">배당 1차 승인 권한</span></span>
+        </button>
+        <button data-lv="auditor" onclick="bhSwitchLevel('auditor')">
+          <span class="ic">🔍</span>
+          <span class="meta"><span class="n">감사</span><span class="s">배당 2차 서명 권한</span></span>
+        </button>
+        <button data-lv="admin"   onclick="bhSwitchLevel('admin')">
           <span class="ic">🛡</span>
           <span class="meta"><span class="n">운영자</span><span class="s">CORP_ADMIN · 곡성군</span></span>
         </button>
@@ -364,19 +520,41 @@
 <script>
   // ─── 계정 레벨 상태 ──────────────────────
   window.__bh = {
-    level: 'guest',       // 'guest' | 'member' | 'admin'
+    level: 'guest',       // 'guest' | 'member' | 'chair' | 'auditor' | 'admin'
+    // 현재 조합의 플랜 (Standard / Premium).
+    //   standard : 일반 계좌이체 + 공용 가상계좌 (수동 확인)
+    //   premium  : PG사 연동 → 개별 가상계좌 자동 발급 + 입금 자동 확인
+    // 배당 지급은 플랜 무관, 둘 다 곡성사랑상품권 API 로 일괄 발행.
+    coopPlan: 'premium',
     join: {
-      step: 1,            // 1..5
+      step: 1,
       code: 'ABC123',
       kakaoOk: false,
       passOk: false,
       residenceOk: false,
-      amount: 1000000,    // 기본 선택 금액 (원)
-      method: 'transfer', // 'transfer' | 'vacct'
+      amount: 1000000,
+      method: 'transfer', // Standard: 'transfer' | 'vacct' / Premium: 자동 가상계좌
+    },
+    // 배당 집행 상태머신: DRAFT → REVIEW → APPROVED → PAID
+    //   REVIEW: 조합장 승인 대기
+    //   APPROVED: 감사 서명 대기
+    //   PAID: 지급 완료 (상품권 API 일괄 발행)
+    dividend: {
+      state: 'REVIEW',
+      periodId: 'dp-2026h1',
+      periodLabel: '2026 상반기 (2025.10 ~ 2026.03)',
+      eligible: 1231,
+      totalAmount: 42340000,
+      perAvg: 34395,
+      log: [],           // 승인/서명 이벤트 로그
+      chairBy: '정○○',
+      auditorBy: '강○○',
     },
   };
 
   // ─── 네비 매핑 (레벨별) ──────────────────
+  // 조합원(member)은 의도적으로 '조합원 명부' 제거 — 타 조합원 개인정보 조회 차단.
+  // 조합장(chair)·감사(auditor)·운영자(admin)만 명부 접근 가능.
   const BH_NAV = {
     guest: [{
       title: '가입 플로우',
@@ -391,6 +569,31 @@
     member: [{
       title: '우리 조합',
       items: [
+        { view:'coop',         label:'내 조합 현황',     ic:'🏠' },
+        { view:'coop-vote',    label:'총회 · 의결',      ic:'🗳' },
+      ],
+    }],
+    chair: [{
+      title: '조합장 전용',
+      items: [
+        { view:'dividend-chair', label:'배당 승인',      ic:'✍️' },
+      ],
+    }, {
+      title: '우리 조합',
+      items: [
+        { view:'coop',         label:'조합 현황',        ic:'🏠' },
+        { view:'coop-members', label:'조합원 명부',      ic:'📋' },
+        { view:'coop-vote',    label:'총회 · 의결',      ic:'🗳' },
+      ],
+    }],
+    auditor: [{
+      title: '감사 전용',
+      items: [
+        { view:'dividend-audit', label:'배당 감사 서명',  ic:'🔏' },
+      ],
+    }, {
+      title: '우리 조합',
+      items: [
         { view:'coop',         label:'조합 현황',        ic:'🏠' },
         { view:'coop-members', label:'조합원 명부',      ic:'📋' },
         { view:'coop-vote',    label:'총회 · 의결',      ic:'🗳' },
@@ -399,14 +602,15 @@
     admin: [{
       title: '운영',
       items: [
-        { view:'admin-home',   label:'운영 대시보드',     ic:'📊' },
-        { view:'admin-coop',   label:'조합 운영 · 배당',  ic:'💼' },
-        { view:'coop-onboard', label:'조합원 온보딩',     ic:'⬆' },
-        { view:'admin-docs',   label:'문서 관리',         ic:'📄' },
-        { view:'admin-logs',   label:'질의 로그',         ic:'📝' },
+        { view:'admin-home',   label:'운영 대시보드',        ic:'📊' },
+        { view:'admin-coop',   label:'조합 운영 · 배당',     ic:'💼' },
+        { view:'coop-onboard', label:'조합원 온보딩',        ic:'⬆' },
+        { view:'plan-compare', label:'Standard vs Premium', ic:'🪙' },
+        { view:'admin-docs',   label:'문서 관리',            ic:'📄' },
+        { view:'admin-logs',   label:'질의 로그',            ic:'📝' },
       ],
     }, {
-      title: '읽기 전용 (조합원 시점)',
+      title: '읽기 전용',
       items: [
         { view:'coop',         label:'조합 현황',        ic:'🏠' },
         { view:'coop-members', label:'조합원 명부',      ic:'📋' },
@@ -416,9 +620,11 @@
   };
 
   const LEVEL_DEFAULT_VIEW = {
-    guest:  'join-code',
-    member: 'coop',
-    admin:  'admin-home',
+    guest:   'join-code',
+    member:  'coop',
+    chair:   'dividend-chair',
+    auditor: 'dividend-audit',
+    admin:   'admin-home',
   };
 
   // ─── breadcrumb titles (기존 viewTitles 확장) ──
@@ -429,6 +635,9 @@
     viewTitles['join-payment']   = ['가입', '출자금 납부'];
     viewTitles['join-done']      = ['가입', '완료'];
     viewTitles['coop-onboard']   = ['운영', '조합원 온보딩'];
+    viewTitles['dividend-chair'] = ['조합장', '배당 승인'];
+    viewTitles['dividend-audit'] = ['감사',   '배당 서명'];
+    viewTitles['plan-compare']   = ['운영',   'Standard · Premium 비교'];
   }
 
   // ─── 사이드바 네비 렌더 ──────────────────
@@ -455,7 +664,13 @@
 
     // 레벨 배지
     const badge = document.getElementById('bh-level-badge');
-    const meta = { guest:['👤 비회원','guest'], member:['🤝 조합원','member'], admin:['🛡 운영자 (CORP_ADMIN)','admin'] }[lv];
+    const meta = {
+      guest:   ['👤 비회원',              'guest'],
+      member:  ['🤝 조합원',              'member'],
+      chair:   ['👑 조합장',              'chair'],
+      auditor: ['🔍 감사',                'auditor'],
+      admin:   ['🛡 운영자 (CORP_ADMIN)', 'admin'],
+    }[lv];
     badge.textContent = meta[0];
     badge.className = 'bh-level-badge ' + meta[1];
   }
@@ -896,6 +1111,480 @@
       setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 2000);
     };
   }
+
+  // ═══════════════════════════════════════════════════
+  // 조합장 배당 승인 (dividend-chair)
+  // ═══════════════════════════════════════════════════
+  views['dividend-chair'] = () => {
+    const d = window.__bh.dividend;
+    const canAct = d.state === 'REVIEW';
+    const done   = d.state === 'APPROVED' || d.state === 'PAID';
+    return `
+      <div class="stack">
+        <div class="apv-card">
+          <div class="apv-hd">
+            <span class="apv-role-badge chair">👑 조합장 · 정○○</span>
+            <div>
+              <div class="apv-title">배당 집행 1차 승인 요청</div>
+              <div class="apv-sub">기간: ${d.periodLabel} · 2인 승인제의 1단계</div>
+            </div>
+          </div>
+
+          <div class="apv-state">
+            <span class="dot ${done?'done':''}"></span>
+            <strong>현재 상태:</strong>
+            ${d.state === 'REVIEW'   ? '조합장 승인 대기 중 (내 턴)' :
+              d.state === 'APPROVED' ? '감사 서명 대기 (내 단계 완료)' :
+              d.state === 'PAID'     ? '지급 완료 — 상품권 API 일괄 발행 실행됨' :
+              '집행 단계 진입 전'}
+          </div>
+
+          <div class="apv-kv">
+            <div><div class="k">정산 기간</div><div class="v">${d.periodLabel}</div></div>
+            <div><div class="k">대상 조합원 (ACTIVE 스냅샷)</div><div class="v">${d.eligible.toLocaleString()} 명</div></div>
+            <div><div class="k">총 배당 재원</div><div class="v lg" style="color:var(--blue-700);">${d.totalAmount.toLocaleString()} 원</div></div>
+            <div><div class="k">1인 평균</div><div class="v">${d.perAvg.toLocaleString()} 원</div></div>
+          </div>
+
+          <div style="padding:14px 16px;background:#F3E8FF;border:1px solid #ddd6fe;border-radius:10px;font-size:12.5px;color:#5B21B6;line-height:1.65;">
+            <strong style="color:#4C1D95;">⚠ 승인 전 확인사항</strong><br>
+            · 회계연도 결산 (2026.04.12 감사 승인 완료)<br>
+            · 거리 등급별 배당 가중치 적용 결과 확인<br>
+            · 지역화폐 API 재원 잔액 확인<br>
+            · 배당 집행 후에는 감사 서명까지 완료돼야 PAID 전환
+          </div>
+
+          <div class="apv-actions">
+            ${done ? `<div class="apv-done-banner">✓ 조합장 승인 완료 — 감사 서명 단계로 넘어감</div>` : `
+              <button class="btn-ghost" onclick="divReject()">반려 (DRAFT 로 돌림)</button>
+              <button class="apv-btn-primary chair" ${canAct?'':'disabled'} onclick="divChairApprove()">
+                ${canAct ? '조합장 승인 · 서명' : '승인 가능 단계 아님'} ▸
+              </button>
+            `}
+          </div>
+
+          ${d.log.length ? `
+            <div class="apv-log">
+              <div style="font-weight:700;color:var(--ink-700);margin-bottom:6px;">승인 로그</div>
+              ${d.log.map(l => `<div class="apv-log-row"><span>${l.at} · ${l.who} · ${l.action}</span><span class="tx">TX ${l.tx}</span></div>`).join('')}
+            </div>` : ''}
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-tt">상품권 지급 시뮬레이션 (발효 후)</div><div class="card-sub">감사 서명까지 완료되면 자동 실행</div></div>
+          </div>
+          <div class="card-bd">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div class="ob-summary-cell"><div class="l">상품권 발행</div><div class="v">${d.totalAmount.toLocaleString()}<span class="u">원</span></div></div>
+              <div class="ob-summary-cell"><div class="l">+3% 가산 (조합 부담)</div><div class="v" style="color:var(--ok);">${Math.round(d.totalAmount*0.03).toLocaleString()}<span class="u">원</span></div></div>
+              <div class="ob-summary-cell"><div class="l">지역 환류 예상</div><div class="v" style="color:#F59E0B;">${Math.round(d.totalAmount*0.875).toLocaleString()}<span class="u">원</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  // ═══════════════════════════════════════════════════
+  // 감사 배당 서명 (dividend-audit)
+  // ═══════════════════════════════════════════════════
+  views['dividend-audit'] = () => {
+    const d = window.__bh.dividend;
+    const waitingChair = d.state === 'REVIEW';
+    const canAct       = d.state === 'APPROVED';
+    const done         = d.state === 'PAID';
+    return `
+      <div class="stack">
+        <div class="apv-card">
+          <div class="apv-hd">
+            <span class="apv-role-badge auditor">🔍 감사 · 강○○</span>
+            <div>
+              <div class="apv-title">배당 집행 2차 감사 서명</div>
+              <div class="apv-sub">기간: ${d.periodLabel} · 2인 승인제의 최종 단계</div>
+            </div>
+          </div>
+
+          <div class="apv-state">
+            <span class="dot ${done?'done':''}"></span>
+            <strong>현재 상태:</strong>
+            ${waitingChair ? '조합장 승인 대기 — 내 서명 차례 아님' :
+              canAct       ? '감사 서명 대기 중 (내 턴)' :
+              done         ? '지급 완료 — 상품권 API 일괄 발행 실행됨' :
+              '집행 단계 진입 전'}
+          </div>
+
+          <div class="apv-kv">
+            <div><div class="k">조합장 승인</div><div class="v" style="color:${d.state!=='REVIEW'?'var(--ok)':'var(--warn)'};">${d.state==='REVIEW' ? '대기 중' : '✓ 완료 · '+(d.log[0]?.at||'—')}</div></div>
+            <div><div class="k">서명자</div><div class="v">${d.auditorBy}</div></div>
+            <div><div class="k">총 배당 재원</div><div class="v lg">${d.totalAmount.toLocaleString()} 원</div></div>
+            <div><div class="k">지급 방식</div><div class="v">곡성사랑상품권 API (일괄 발행)</div></div>
+          </div>
+
+          ${waitingChair ? `
+            <div class="apv-waiting">
+              <div class="ic">⏳</div>
+              조합장 1차 승인이 먼저 완료되어야 감사 서명 단계로 진입합니다.
+              <div style="margin-top:12px;font-size:11.5px;color:var(--ink-400);">
+                조합장 화면에서 승인되면 이 화면에 자동으로 서명 버튼이 활성화돼요.
+              </div>
+            </div>
+          ` : `
+            <div style="padding:14px 16px;background:#E0F2FE;border:1px solid #bae6fd;border-radius:10px;font-size:12.5px;color:#075985;line-height:1.65;">
+              <strong style="color:#0C4A6E;">🔏 서명 전 확인사항</strong><br>
+              · 감사 승인 완료된 결산 자료 대조 (2026.04.12)<br>
+              · 조합장 승인 해시 무결성 검증<br>
+              · 배당 대상 조합원 수·금액 재검증<br>
+              · 서명 즉시 <strong>곡성사랑상품권 API 일괄 발행</strong> 트리거 → 되돌릴 수 없음
+            </div>
+
+            <div class="apv-actions">
+              ${done ? `<div class="apv-done-banner">✓ 감사 서명 완료 · ${d.eligible.toLocaleString()}명에게 상품권 일괄 발행됨</div>` : `
+                <button class="btn-ghost" onclick="divReject()">반려 (조합장 재검토 요청)</button>
+                <button class="apv-btn-primary auditor" ${canAct?'':'disabled'} onclick="divAuditorSign()">
+                  감사 서명 · 상품권 지급 실행 ▸
+                </button>
+              `}
+            </div>
+          `}
+
+          ${d.log.length ? `
+            <div class="apv-log">
+              <div style="font-weight:700;color:var(--ink-700);margin-bottom:6px;">승인 로그 (블록체인 원장 기록)</div>
+              ${d.log.map(l => `<div class="apv-log-row"><span>${l.at} · ${l.who} · ${l.action}</span><span class="tx">TX ${l.tx}</span></div>`).join('')}
+            </div>` : ''}
+        </div>
+      </div>
+    `;
+  };
+
+  // ═══════════════════════════════════════════════════
+  // 배당 승인 액션
+  // ═══════════════════════════════════════════════════
+  function _tx() { return (Math.random().toString(16).slice(2,6) + '…' + Math.random().toString(16).slice(2,6)); }
+  function _now() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+
+  function divChairApprove() {
+    if (!confirm('조합장 승인은 블록체인 원장에 기록됩니다. 진행하시겠어요?')) return;
+    const d = window.__bh.dividend;
+    d.state = 'APPROVED';
+    d.log.unshift({ at: _now(), who: d.chairBy, action: '조합장 승인', tx: _tx() });
+    toast('✓ 조합장 승인 완료 · 감사 서명 대기로 전환');
+    go('dividend-chair');
+  }
+  function divAuditorSign() {
+    if (!confirm('감사 서명 후에는 상품권 API 가 즉시 발행됩니다. 되돌릴 수 없어요. 계속?')) return;
+    const d = window.__bh.dividend;
+    d.state = 'PAID';
+    d.log.unshift({ at: _now(), who: d.auditorBy, action: '감사 서명 + 상품권 API 발행 트리거', tx: _tx() });
+    toast('✓ 감사 서명 · 곡성사랑상품권 '+d.eligible.toLocaleString()+'명 일괄 발행 완료');
+    go('dividend-audit');
+  }
+  function divReject() {
+    if (!confirm('배당 집행을 반려하여 DRAFT 로 되돌립니다. 진행?')) return;
+    const d = window.__bh.dividend;
+    const prev = d.state;
+    d.state = 'DRAFT';
+    d.log.unshift({ at: _now(), who: prev==='REVIEW'?d.chairBy:d.auditorBy, action: '반려 — DRAFT 로 되돌림', tx: _tx() });
+    toast('반려 처리 — DRAFT 단계로 이동');
+    go(window.__bh.level === 'chair' ? 'dividend-chair' : 'dividend-audit');
+  }
+
+  // ═══════════════════════════════════════════════════
+  // Standard vs Premium 비교 (plan-compare)
+  // ═══════════════════════════════════════════════════
+  views['plan-compare'] = () => {
+    const cur = window.__bh.coopPlan;
+    return `
+      <div class="stack">
+        <div class="plan-hd">
+          <h2>🪙 로컬에너지 플랫폼 — 조합 요금제</h2>
+          <p>조합별로 <strong>Standard</strong> 또는 <strong>Premium</strong> 선택 · 현재 조합 플랜: <strong>${cur==='premium'?'Premium':'Standard'}</strong></p>
+        </div>
+        <div class="plan-grid">
+          <div class="plan-col ${cur==='standard'?'on':''}">
+            <h3>Standard</h3>
+            <div class="sub">기본형 — 소규모 조합 · 수동 운영</div>
+            <div class="price">월 <strong>0원</strong> + 운영 지원 옵션<span style="color:var(--ink-500);font-size:11.5px;"> (루트에너지 별도 계약)</span></div>
+            <ul class="plan-feats">
+              <li><span class="ck">✓</span><span class="meta"><strong>조합원 · 배당 · 총회</strong> 기본 기능 전체<span class="note">현재 프로토타입에 구현된 모든 뷰 동일 제공</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>배당 지급 — 상품권 API</strong> 자동 연동<span class="note">곡성사랑상품권 등 지역화폐 일괄 발행 (조합별 1개)</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>AI 에이전트 · 햇빛소득 진단</strong>(별도 프로덕트)</span></li>
+              <li><span class="ck x">—</span><span class="meta"><strong>출자금 입금: 계좌이체 + 공용 가상계좌</strong><span class="note">담당자가 입금 내역을 <u>수동 매칭</u>해 ACTIVE 처리</span></span></li>
+              <li><span class="ck x">—</span><span class="meta">PG사 연동 없음 · <strong>개별 가상계좌 발급 불가</strong></span></li>
+              <li><span class="ck x">—</span><span class="meta">자동 입금 대사 · 영수증 발행 없음</span></li>
+            </ul>
+            <div class="plan-flow">
+조합원 → 이체<br>
+  ↓<br>
+운영자: 입금 내역 <strong>수동 확인</strong><br>
+  ↓<br>
+<strong>배당 지급 → 상품권 API</strong> (동일)
+            </div>
+          </div>
+
+          <div class="plan-col premium ${cur==='premium'?'on':''}">
+            <h3>Premium</h3>
+            <div class="sub">자동화 — 중대형 조합 · PG 연동</div>
+            <div class="price">월 <strong>{요율 협의}</strong> · PG 수수료 실비<span style="color:var(--ink-500);font-size:11.5px;"> (결제건당)</span></div>
+            <ul class="plan-feats">
+              <li><span class="ck">✓</span><span class="meta"><strong>Standard 의 모든 기능</strong> 포함</span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>PG사 연동 — 개별 가상계좌 자동 발급</strong><span class="note">조합원 1인당 고유 계좌번호 · KCP / 토스페이먼츠 / NHN KCP 등</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>출자금 자동 대사 · 즉시 ACTIVE 전환</strong><span class="note">PG 웹훅으로 입금 감지 → 조합원 상태 자동 전환 (Standard 는 수동)</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>자동 영수증 · 증빙서류 생성</strong><span class="note">세금계산서·기부금영수증·출자증서 자동 발행</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>배당 지급 — 상품권 API</strong>(Standard 동일)<span class="note">수령 방식은 두 플랜 모두 곡성사랑상품권 일괄 발행으로 공통</span></span></li>
+              <li><span class="ck">✓</span><span class="meta"><strong>실시간 재원 대시보드</strong> · PG 정산 현황</span></li>
+            </ul>
+            <div class="plan-flow">
+조합원 → <strong>PG 개별 가상계좌</strong> 이체<br>
+  ↓<br>
+PG 웹훅 → <strong>자동 감지 · 자동 매칭 · ACTIVE 전환</strong><br>
+  ↓<br>
+<strong>배당 지급 → 상품권 API</strong> (Standard 와 동일)
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-tt">공통 — 배당 지급 파이프라인</div><div class="card-sub">두 플랜 모두 동일 (조합장 승인 → 감사 서명 → 상품권 API 발행)</div></div>
+          </div>
+          <div class="card-bd">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--ink-25);border-radius:10px;font-family:monospace;font-size:12px;line-height:1.7;">
+              <div style="padding:8px 14px;background:var(--ink-100);border-radius:8px;">DRAFT<br><span style="font-size:10px;color:var(--ink-500);">계산 완료</span></div>
+              <div style="flex:0;color:var(--ink-300);">→</div>
+              <div style="padding:8px 14px;background:#F3E8FF;border-radius:8px;color:#6D28D9;"><strong>REVIEW</strong><br><span style="font-size:10px;">조합장 승인</span></div>
+              <div style="flex:0;color:var(--ink-300);">→</div>
+              <div style="padding:8px 14px;background:#E0F2FE;border-radius:8px;color:#0369A1;"><strong>APPROVED</strong><br><span style="font-size:10px;">감사 서명</span></div>
+              <div style="flex:0;color:var(--ink-300);">→</div>
+              <div style="padding:8px 14px;background:#DCFCE7;border-radius:8px;color:#166534;"><strong>PAID</strong><br><span style="font-size:10px;">상품권 API 발행</span></div>
+            </div>
+            <div style="margin-top:12px;font-size:12px;color:var(--ink-500);line-height:1.6;">
+              둘 다 <strong style="color:var(--ink-900);">2인 승인제</strong>(조합장 + 감사)가 필수이고, 실제 현금은 조합원 계좌로 송금하지 않습니다.
+              전액 <strong style="color:var(--ok);">지역화폐 상품권 API 로 일괄 발행</strong>되어 지역 경제에 환류되는 구조예요.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-tt">현재 조합 플랜 전환 (시뮬레이션)</div><div class="card-sub">배포 시엔 CORP_ADMIN 이 요청 → 루트에너지 본사 승인 후 전환</div></div>
+          </div>
+          <div class="card-bd">
+            <div class="plan-toggle" style="margin-bottom:0;">
+              <button class="${cur==='standard'?'on':''}" onclick="bhSetPlan('standard')">Standard</button>
+              <button class="${cur==='premium' ?'on':''}" onclick="bhSetPlan('premium')">Premium</button>
+            </div>
+            <div style="display:inline-block;margin-left:14px;font-size:12px;color:var(--ink-500);">
+              → 현재 '출자금 납부' 화면의 입금 방식 UI 가 플랜에 맞춰 바뀝니다.
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  function bhSetPlan(p) {
+    window.__bh.coopPlan = p;
+    toast('조합 플랜 → ' + (p==='premium'?'Premium':'Standard'));
+    go('plan-compare');
+  }
+
+  // ═══════════════════════════════════════════════════
+  // 조합원 명부 접근 가드 (guest/member 차단)
+  // ═══════════════════════════════════════════════════
+  const _origCoopMembers = views['coop-members'];
+  views['coop-members'] = () => {
+    const lv = window.__bh.level;
+    if (lv === 'guest' || lv === 'member') {
+      return `
+        <div class="stack">
+          <div class="bh-gate">
+            <div class="ic">🔒</div>
+            <div class="t">이 화면은 ${lv==='guest'?'가입 전에는':'조합원 권한으로는'} 볼 수 없어요</div>
+            <div class="s">
+              타 조합원의 개인정보(이름·주소·출자금 등)는 <strong>조합장·감사·운영자</strong> 만 조회 가능합니다.<br>
+              조합원은 본인 정보만 <a href="#" onclick="go('coop');return false;" style="color:var(--blue-700);">내 조합 현황</a> 에서 확인할 수 있어요.
+            </div>
+            <div>
+              <button class="btn-primary" onclick="go('${lv==='guest'?'join-code':'coop'}')">
+                ${lv==='guest'?'가입 플로우로 →':'내 조합 현황으로 →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return _origCoopMembers();
+  };
+
+  // ═══════════════════════════════════════════════════
+  // 운영자 배당 파이프라인 — 현재 dividend 상태 반영
+  // ═══════════════════════════════════════════════════
+  const _origAdminCoop = views['admin-coop'];
+  views['admin-coop'] = () => {
+    const d = window.__bh.dividend;
+    const order = ['DRAFT','REVIEW','APPROVED','PAID'];
+    const idx = order.indexOf(d.state);
+    const stateInfo = {
+      DRAFT:    ['bd-ink',  '시작 전'],
+      REVIEW:   ['bd-warn', '조합장 승인 대기'],
+      APPROVED: ['bd-blue', '감사 서명 대기'],
+      PAID:     ['bd-ok',   '지급 완료'],
+    }[d.state];
+    // 기존 뷰를 재활용하되, 상단에 현재 상태 카드를 덧붙임
+    return `
+      <div class="stack">
+        <div class="apv-card">
+          <div class="apv-hd">
+            <span class="badge ${stateInfo[0]}" style="font-size:12px;padding:4px 12px;">${stateInfo[1]}</span>
+            <div>
+              <div class="apv-title">배당 집행 파이프라인 · ${d.periodLabel}</div>
+              <div class="apv-sub">현재 조합 플랜: <strong>${window.__bh.coopPlan==='premium'?'Premium':'Standard'}</strong> · 배당 지급은 두 플랜 모두 상품권 API 로 동일</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:12px;background:var(--ink-25);border-radius:10px;font-size:11.5px;font-family:monospace;">
+            ${order.map((s,i) => {
+              const active = i === idx;
+              const done = i < idx;
+              const style = done
+                ? 'background:#DCFCE7;color:#166534;'
+                : active
+                  ? 'background:'+(s==='REVIEW'?'#F3E8FF;color:#6D28D9':s==='APPROVED'?'#E0F2FE;color:#0369A1':'var(--blue-50);color:var(--blue-700)')+';font-weight:700;'
+                  : 'background:var(--ink-100);color:var(--ink-500);';
+              return `<div style="flex:1;padding:8px 10px;border-radius:6px;text-align:center;${style}">${s}</div>` + (i<order.length-1?'<div style="color:var(--ink-300);">→</div>':'');
+            }).join('')}
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;font-size:12px;">
+            <button class="btn-ghost" onclick="bhSwitchLevel('chair')">👑 조합장 화면으로 이동</button>
+            <button class="btn-ghost" onclick="bhSwitchLevel('auditor')">🔍 감사 화면으로 이동</button>
+            ${d.state === 'PAID' ? `<button class="btn-ghost" onclick="divResetCycle()">다음 주기(DRAFT)로 리셋</button>` : ''}
+          </div>
+        </div>
+
+        ${_origAdminCoop()}
+      </div>
+    `;
+  };
+
+  function divResetCycle() {
+    window.__bh.dividend = {
+      state: 'REVIEW', periodId:'dp-2026h2', periodLabel:'2026 하반기 (2026.04 ~ 2026.09)',
+      eligible: 1248, totalAmount: 43520000, perAvg: 34871,
+      chairBy:'정○○', auditorBy:'강○○', log:[],
+    };
+    toast('새 배당 주기 시작 — DRAFT → REVIEW');
+    go('admin-coop');
+  }
+
+  // ═══════════════════════════════════════════════════
+  // 가입 플로우 Step 4 — Premium 이면 PG 개별 가상계좌 자동
+  // ═══════════════════════════════════════════════════
+  views['join-payment'] = () => {
+    const j = window.__bh.join;
+    const plan = window.__bh.coopPlan;
+    const AMTS = [
+      { v: 500000,   l:'50만원',    s:'최소 출자금' },
+      { v: 1000000,  l:'100만원',   s:'추천 ⭐',    rec: true },
+      { v: 3000000,  l:'300만원',   s:'' },
+      { v: 5000000,  l:'500만원',   s:'' },
+      { v: 10000000, l:'1,000만원', s:'최대 한도' },
+    ];
+
+    // 플랜에 따른 입금 UI 분기
+    const paymentUi = plan === 'premium' ? `
+      <div style="padding:16px 18px;background:linear-gradient(135deg,#fafbff 0%,#eff6ff 100%);border:1px solid #bfdbfe;border-radius:10px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="background:linear-gradient(135deg,#f59e0b 0%,#dc2626 100%);color:#fff;padding:2px 10px;border-radius:100px;font-size:10px;font-weight:800;letter-spacing:0.06em;">PREMIUM</span>
+          <strong style="color:var(--blue-700);">PG사 연동 · 개별 가상계좌 자동 발급</strong>
+        </div>
+        <div style="font-size:12px;color:var(--ink-600);line-height:1.6;">
+          이 조합은 <strong>Premium 플랜</strong>이라 조합원 1인당 <u>고유 가상계좌</u>가 자동 발급되고,
+          입금 시 PG 웹훅으로 <strong>자동 매칭·ACTIVE 전환</strong>돼요. 운영자 수동 확인 불필요.
+        </div>
+      </div>
+      <div class="jn-vacct">[Premium · 개별 가상계좌 자동 발급]
+PG사 : 토스페이먼츠 (TossPayments)
+은행 : 농협
+<span class="acct">352-9004-${String(Math.floor(Math.random()*9999)).padStart(4,'0')}-${String(Math.floor(Math.random()*99)).padStart(2,'0')}</span>
+예금주 : 곡성군민에너지협동조합(윤태환 전용)
+금액 : <strong>${j.amount.toLocaleString()} 원</strong>
+유효 : <strong>만료 없음</strong> (입금 즉시 ACTIVE 전환)
+상태 : 🟢 입금 대기 · 자동 감지
+</div>
+    ` : `
+      <div style="padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;margin-bottom:14px;font-size:12px;color:#78350f;">
+        <strong>Standard 플랜</strong> — 계좌이체 후 운영자 수동 확인 또는 공용 가상계좌 입금 방식
+      </div>
+      <div style="font-size:12.5px;font-weight:600;color:var(--ink-700);margin-bottom:8px;">납부 방법</div>
+      <div class="jn-pay-methods">
+        <div class="jn-pay-method ${j.method==='transfer'?'on':''}" onclick="jnSetMethod('transfer')">
+          <div class="ti">💸 계좌이체 (운영자 수동 확인)</div>
+          <div class="de">본인 계좌에서 조합 계좌로 송금 후 관리자 확인 대기</div>
+        </div>
+        <div class="jn-pay-method ${j.method==='vacct'?'on':''}" onclick="jnSetMethod('vacct')">
+          <div class="ti">🏦 공용 가상계좌</div>
+          <div class="de">조합 대표 가상계좌 · 입금자명으로 매칭 (수동 검증)</div>
+        </div>
+      </div>
+      ${j.method==='vacct' ? `
+        <div class="jn-vacct">[Standard · 공용 가상계좌]
+은행 : 농협
+<span class="acct">352-0001-1234-00</span>
+예금주 : 곡성군민에너지협동조합
+금액 : <strong>${j.amount.toLocaleString()} 원</strong>
+예정 입금자명 : <strong>윤태환</strong>
+유효 : 24시간 (이후 재발급)
+</div>` : `
+        <div style="padding:14px 18px;background:var(--ink-50);border-radius:10px;font-size:12px;color:var(--ink-600);">
+          본인 명의 계좌에서 <strong>곡성군민에너지협동조합 (농협 352-0001-1234-00)</strong> 으로 ${j.amount.toLocaleString()}원 이체 후 "납부 완료" 버튼을 눌러주세요.
+        </div>
+      `}
+    `;
+
+    return `
+      <div class="stack">
+        ${jnProgress(4)}
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-tt">4. 출자금 납부</div>
+              <div class="card-sub">조합원이 되면 예상 연 배당률 약 9.2% (× 거리 가중치 1.0배) · <strong>배당은 곡성사랑상품권으로 지급</strong></div>
+            </div>
+            <span class="badge ${plan==='premium'?'bd-ok':'bd-ink'}">${plan==='premium'?'Premium 플랜':'Standard 플랜'}</span>
+          </div>
+          <div class="card-bd">
+            <div style="font-size:12.5px;font-weight:600;color:var(--ink-700);margin-bottom:8px;">출자금액</div>
+            <div class="jn-amounts">
+              ${AMTS.map(a => `
+                <button class="jn-amount ${j.amount===a.v?'on':''}" onclick="jnSetAmt(${a.v})">
+                  <div class="v">${a.l}</div>
+                  ${a.rec ? '<div class="rec">RECOMMEND</div>' : a.s ? `<div class="s">${a.s}</div>` : '<div class="s">&nbsp;</div>'}
+                </button>
+              `).join('')}
+            </div>
+
+            <div style="padding:14px 18px;background:var(--blue-50);border:1px solid #bfdbfe;border-radius:10px;margin-bottom:18px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);margin-bottom:4px;"><span>선택 금액</span><strong style="color:var(--ink-900);">${j.amount.toLocaleString()} 원</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);margin-bottom:4px;"><span>예상 연 배당 (9.2% × 1.0배)</span><strong style="color:var(--blue-700);">${Math.round(j.amount * 0.092).toLocaleString()} 원</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);"><span>배당 수령 방식</span><strong style="color:var(--ink-900);">곡성사랑상품권 API (플랜 무관 공통)</strong></div>
+            </div>
+
+            ${paymentUi}
+
+            <div class="jn-foot">
+              <button class="btn-ghost" onclick="jnGoStep(3)">← 이전</button>
+              <div class="rt">
+                <button class="btn-primary" onclick="jnComplete()">
+                  ${plan==='premium' ? '✓ 가상계좌 발급됨 · 입금 확인 (자동)' : (j.method==='transfer'?'✓ 납부 완료 →':'가상계좌 확인 · 입금 대기 →')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
 
   // ═══════════════════════════════════════════════════
   // 부팅 — 기본 레벨 = guest, 기본 뷰 = join-code
