@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로컬에너지플랫폼 — 개발 인덱스</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <style>
+    body { padding: 40px; max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: var(--color-primary); }
+    .subtitle { color: var(--color-text-secondary); margin-bottom: 40px; }
+    .section { margin-bottom: 32px; }
+    .section h2 { font-size: 14px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; }
+    .page-list { display: flex; flex-direction: column; gap: 8px; }
+    .page-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--color-surface); border-radius: var(--radius-sm); border: 1px solid var(--color-border); text-decoration: none; color: var(--color-text-primary); transition: var(--transition); }
+    .page-item:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
+    .page-item .icon { font-size: 20px; }
+    .page-item .info { flex: 1; }
+    .page-item .name { font-weight: 600; font-size: 15px; }
+    .page-item .desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+    .badge-wip { font-size: 11px; background: #FFF3E0; color: #E65100; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
+    .badge-done { font-size: 11px; background: #E8F5E9; color: var(--color-primary); padding: 2px 8px; border-radius: 100px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>🌿 로컬에너지플랫폼</h1>
+  <p class="subtitle">프로토타입 화면 목록 — 브라우저에서 직접 열어 확인하세요</p>
+
+  <div class="section">
+    <h2>📋 투자자 화면</h2>
+    <div class="page-list">
+      <a class="page-item" href="pages/product-list.html">
+        <span class="icon">📦</span>
+        <div class="info">
+          <div class="name">투자 상품 목록</div>
+          <div class="desc">펀딩 중인 재생에너지 상품 리스트, 필터/정렬</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+      <a class="page-item" href="pages/product-detail.html">
+        <span class="icon">🔍</span>
+        <div class="info">
+          <div class="name">상품 상세</div>
+          <div class="desc">상품 정보, 펀딩 현황, 투자하기 버튼</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+      <a class="page-item" href="pages/my-portfolio.html">
+        <span class="icon">💼</span>
+        <div class="info">
+          <div class="name">마이 포트폴리오</div>
+          <div class="desc">내 투자 현황, 예상 수익, 상환 일정</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>⚙️ 관리자 화면</h2>
+    <div class="page-list">
+      <a class="page-item" href="pages/admin-dashboard.html">
+        <span class="icon">📊</span>
+        <div class="info">
+          <div class="name">관리자 대시보드</div>
+          <div class="desc">전체 상품 현황, 투자자 수, 펀딩 현황 요약</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+      <a class="page-item" href="pages/admin-product-create.html">
+        <span class="icon">➕</span>
+        <div class="info">
+          <div class="name">상품 등록</div>
+          <div class="desc">새 투자 상품 생성 폼</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📄 백엔드 개발 참고 문서</h2>
+    <div class="page-list">
+      <a class="page-item" href="docs/db-schema.md">
+        <span class="icon">🗄️</span>
+        <div class="info">
+          <div class="name">DB 스키마</div>
+          <div class="desc">테이블 설계 초안 (users, products, investments, repayments)</div>
+        </div>
+        <span class="badge-done">초안 있음</span>
+      </a>
+      <a class="page-item" href="docs/api-spec.md">
+        <span class="icon">🔌</span>
+        <div class="info">
+          <div class="name">API 명세</div>
+          <div class="desc">엔드포인트 목록 및 요청/응답 형식</div>
+        </div>
+        <span class="badge-wip">작업 예정</span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
