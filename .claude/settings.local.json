@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:api.anthropic.com)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(awk 'NR==250,NR==290 {print NR\": \\(len=\"length\\($0\\)\"\\)\"; if \\(length\\($0\\)>200\\) print substr\\($0,1,200\\)\"...\"; else print $0}' \"C:/Users/hrpar/Desktop/1_Projects/프로덕트 개발/로컬에너지플랫폼/02_개발/design-main.html\")",
+      "Bash(mkdir -p /c/tmp)",
+      "Bash(awk 'NR==288' \"C:/Users/hrpar/Desktop/1_Projects/프로덕트 개발/로컬에너지플랫폼/02_개발/design-main.html\")",
+      "Read(//c/tmp/**)",
+      "Bash(node *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(git add *)"
     ]
   }
 }

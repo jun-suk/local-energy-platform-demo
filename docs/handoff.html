@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로컬에너지 플랫폼 — 백엔드 핸드오프 · 화면별 기획의도 & API 연결지점</title>
+<style>
+  :root {
+    --ink-900:#0F172A; --ink-700:#334155; --ink-500:#64748B; --ink-300:#94A3B8;
+    --ink-100:#E2E8F0; --ink-50:#F1F5F9; --ink-25:#F8FAFC;
+    --blue-700:#1D4ED8; --blue-600:#2563EB; --blue-500:#3B82F6; --blue-50:#EFF6FF;
+    --ok:#10B981; --warn:#F59E0B; --danger:#EF4444; --teal:#0EA5A3;
+    --mono: 'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; padding:40px 20px; font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;
+    color:var(--ink-700); background:var(--ink-25); line-height:1.55;
+  }
+  .wrap { max-width:1120px; margin:0 auto; }
+  header.top {
+    background:linear-gradient(135deg,#0B1F3A 0%,#1E40AF 100%); color:#fff;
+    padding:32px 28px; border-radius:14px; margin-bottom:32px;
+  }
+  header.top h1 { margin:0 0 6px; font-size:24px; font-weight:700; letter-spacing:-0.5px; }
+  header.top .sub { font-size:13.5px; color:#BFDBFE; }
+  header.top .meta { margin-top:18px; display:flex; flex-wrap:wrap; gap:8px; }
+  header.top .meta span {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.12); color:#E0E7FF;
+    padding:4px 10px; border-radius:100px; font-size:11.5px; font-weight:500;
+  }
+
+  /* ToC */
+  nav.toc {
+    background:#fff; border:1px solid var(--ink-100); border-radius:12px;
+    padding:18px 22px; margin-bottom:28px;
+  }
+  nav.toc h2 { margin:0 0 10px; font-size:11.5px; font-weight:700;
+    color:var(--ink-500); letter-spacing:0.1em; text-transform:uppercase; }
+  nav.toc ol { margin:0; padding:0; list-style:none;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:6px 20px; }
+  nav.toc a { color:var(--ink-700); text-decoration:none; font-size:13px; display:block; padding:4px 0; }
+  nav.toc a:hover { color:var(--blue-600); }
+  nav.toc .num { color:var(--ink-300); font-family:var(--mono); font-size:11px; margin-right:6px; }
+
+  /* 섹션 = 화면 */
+  section.view {
+    background:#fff; border:1px solid var(--ink-100); border-radius:14px;
+    padding:28px 32px; margin-bottom:24px; scroll-margin-top:20px;
+  }
+  section.view > header { border-bottom:1px solid var(--ink-100); padding-bottom:18px; margin-bottom:20px; }
+  section.view h2 { margin:0 0 4px; font-size:19px; font-weight:700; color:var(--ink-900); letter-spacing:-0.3px; }
+  section.view h2 .vkey {
+    font-family:var(--mono); font-size:11.5px; color:var(--blue-600);
+    background:var(--blue-50); padding:2px 8px; border-radius:6px; margin-left:8px; font-weight:500;
+  }
+  section.view h2 .role {
+    font-size:10.5px; padding:2px 8px; border-radius:100px; vertical-align:middle;
+    margin-left:6px; font-weight:600; letter-spacing:0.03em;
+  }
+  section.view h2 .role.resident { background:#DBEAFE; color:#1E40AF; }
+  section.view h2 .role.admin    { background:#FEF3C7; color:#92400E; }
+  section.view .onsight { color:var(--ink-500); font-size:13px; margin-top:4px; }
+
+  /* 하위 블록 */
+  h3.bl { font-size:13px; font-weight:700; color:var(--ink-900); margin:18px 0 10px;
+    padding-bottom:6px; border-bottom:1px dashed var(--ink-100); letter-spacing:-0.2px; }
+  h3.bl .ic { display:inline-block; width:18px; text-align:center; margin-right:6px; }
+
+  .intent { font-size:13.5px; color:var(--ink-700); margin:0 0 10px; }
+  .intent strong { color:var(--ink-900); }
+
+  ul.bullets { margin:0 0 4px 0; padding-left:20px; font-size:13px; }
+  ul.bullets li { margin-bottom:4px; }
+  ul.bullets li strong { color:var(--ink-900); }
+
+  /* 엔드포인트 표 */
+  table.eps {
+    width:100%; border-collapse:collapse; font-size:12.5px; margin:6px 0;
+  }
+  table.eps th, table.eps td {
+    padding:8px 10px; text-align:left; vertical-align:top;
+    border-bottom:1px solid var(--ink-100);
+  }
+  table.eps th {
+    font-size:11px; color:var(--ink-500); font-weight:600; letter-spacing:0.03em;
+    text-transform:uppercase; background:var(--ink-25);
+  }
+  table.eps td .meth {
+    display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700;
+    padding:2px 7px; border-radius:4px; min-width:44px; text-align:center;
+  }
+  .meth.GET    { background:#DBEAFE; color:#1E40AF; }
+  .meth.POST   { background:#DCFCE7; color:#166534; }
+  .meth.PATCH  { background:#FEF3C7; color:#92400E; }
+  .meth.PUT    { background:#FEF3C7; color:#92400E; }
+  .meth.DELETE { background:#FEE2E2; color:#991B1B; }
+  table.eps td code {
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-900);
+    background:var(--ink-50); padding:1px 5px; border-radius:4px;
+  }
+  table.eps td.js {
+    font-family:var(--mono); font-size:11px; color:var(--blue-700);
+  }
+  table.eps td.desc { color:var(--ink-700); }
+
+  /* 상태머신 / 데이터 */
+  .data-shape {
+    background:var(--ink-50); border-left:3px solid var(--blue-500);
+    padding:10px 14px; margin:8px 0; font-family:var(--mono); font-size:11.5px;
+    color:var(--ink-700); white-space:pre-wrap; border-radius:0 6px 6px 0;
+  }
+
+  /* 태그 */
+  .tag {
+    display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:0.03em;
+    padding:2px 8px; border-radius:100px; margin-right:4px;
+  }
+  .tag-write { background:#FEF3C7; color:#92400E; }
+  .tag-read  { background:#DBEAFE; color:#1E40AF; }
+  .tag-cached{ background:#E0E7FF; color:#3730A3; }
+  .tag-realtime{ background:#FEE2E2; color:#991B1B; }
+  .tag-third { background:#F3E8FF; color:#6D28D9; }
+  .tag-ledger{ background:#D1FAE5; color:#065F46; }
+
+  /* 인포 박스 */
+  .note {
+    background:#FFFBEB; border:1px solid #FCD34D; border-radius:8px;
+    padding:10px 14px; font-size:12px; color:#78350F; margin:10px 0;
+  }
+  .note strong { color:#78350F; }
+
+  /* 푸터 */
+  footer.bottom {
+    margin-top:40px; padding:20px; text-align:center;
+    color:var(--ink-500); font-size:11.5px; border-top:1px solid var(--ink-100);
+  }
+  footer.bottom code { font-family:var(--mono); font-size:10.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>로컬에너지 플랫폼 · 백엔드 핸드오프 문서</h1>
+  <div class="sub">화면별 기획의도 + API 연결지점 정리 · 파일럿 1호 곡성군 기준</div>
+  <div class="meta">
+    <span>📄 기준: <code style="font-family:inherit;">src.html</code> · <code style="font-family:inherit;">app.js</code> · <code style="font-family:inherit;">api.js</code></span>
+    <span>🗓 2026-04-23 기준</span>
+    <span>✏️ 준석 (기획)</span>
+    <span>스펙 상세: <code style="font-family:inherit;">docs/db-schema.md</code></span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>목차</h2>
+  <ol>
+    <li><a href="#app-shell"><span class="num">00</span>앱 쉘 · 로그인 · 권한</a></li>
+    <li><a href="#home"><span class="num">01</span>홈</a></li>
+    <li><a href="#chat-free"><span class="num">02</span>AI · 자유 문의</a></li>
+    <li><a href="#chat-haebit"><span class="num">03</span>AI · 햇빛소득 진단</a></li>
+    <li><a href="#dashboard"><span class="num">04</span>지역 대시보드 (지도)</a></li>
+    <li><a href="#coop"><span class="num">05</span>내 조합 (주민)</a></li>
+    <li><a href="#coop-members"><span class="num">06</span>조합원 명부</a></li>
+    <li><a href="#coop-vote"><span class="num">07</span>총회 · 의결</a></li>
+    <li><a href="#admin-home"><span class="num">08</span>운영 대시보드</a></li>
+    <li><a href="#admin-docs"><span class="num">09</span>운영 · 문서 관리</a></li>
+    <li><a href="#admin-logs"><span class="num">10</span>운영 · 질의 로그</a></li>
+    <li><a href="#admin-coop"><span class="num">11</span>운영 · 조합 운영</a></li>
+  </ol>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="app-shell">
+  <header>
+    <h2>00. 앱 쉘 · 로그인 · 권한</h2>
+    <div class="onsight">사이드바 상단 지역 드롭다운 · 탑바 로그인 핫픽 · 로그인 시트 · 사용자 메뉴(권한)</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> "우리 마을 사업의 이익은 실제 주민에게 돌아가야 한다"는 전제를 인증 흐름에서부터 가시화.
+    카카오 로그인(편의) → PASS 본인확인(신원) → 거주지 증빙(자격) 3단계를 모두 통과해야 <code>resident</code> 권한이 부여된다.
+    운영자 권한은 곡성군청 · 조합 사무국에 한해 부여되며, 프로토타입에서는 토글 버튼으로 전환 가능하다.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>화면 트리거</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/auth/login/kakao</code></td><td class="desc">로그인 시트 · "카카오로 계속하기"</td><td class="js">API.auth.kakaoLogin()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/auth/verify/pass</code></td><td class="desc">PASS 휴대폰 본인확인</td><td class="js">API.auth.verifyPass()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/auth/verify/residence</code></td><td class="desc">주민등록 거주지 증빙</td><td class="js">API.auth.verifyResidence({region,emd})</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/auth/me</code></td><td class="desc">앱 부트 / 새로고침</td><td class="js">API.auth.me()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/auth/roles/toggle-admin</code></td><td class="desc"><em>데모 전용</em> — 운영 시 RBAC 승격으로 대체</td><td class="js">API.auth.toggleAdminDemo()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions</code></td><td class="desc">사이드바 지역 드롭다운</td><td class="js">API.regions.list()</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">📦</span>핵심 응답 shape (`/api/auth/me`)</h3>
+  <div class="data-shape">{
+  data: {
+    id, name, kakao_id, phone_masked, email,
+    roles: ['resident','member',  'admin'?],
+    residence: { region_code, region_name, emd_code, emd_name, verified_at },
+    pass_verified_at, kakao_verified_at,
+    member_no, created_at,
+  }
+}</div>
+
+  <div class="note">
+    <strong>운영 시 유의 —</strong> `resident` 권한은 거주지 증빙 완료 <u>이후에만</u> 부여. DB 레벨에서 CHECK 제약.
+    <code>admin</code> 은 항상 `scope_region_code` 가 함께 부여되어야 함 (곡성군 admin 이 다른 지역을 관리하지 못하도록).
+  </div>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>지역 전환</strong> — 클라이언트 state 만 갱신(`selectRegion`), 해당 지역의 EMD/후보지/사업/변전소 재조회 필요. <code>?region=</code> 쿼리 표준.</li>
+    <li><strong>세션</strong> — JWT(`Authorization: Bearer`) 권장. `credentials: include` 대응 가능.</li>
+    <li><strong>Tweaks(화면 설정)</strong> — 글자크기·블루톤·여백밀도는 클라이언트 전용(body data-* 속성). 서버 저장 불필요.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="home">
+  <header>
+    <h2>01. 홈 <span class="vkey">home</span><span class="role resident">주민</span></h2>
+    <div class="onsight">히어로(인사 + 마스코트) → 3개 진입카드 → 동네 소식 → 최신뉴스</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 첫 화면은 "우리 마을 사업이 어디까지 왔는지"를 확인하는 <u>대시보드가 아니라</u>,
+    주민이 뭘 먼저 해볼 수 있는지를 안내하는 <u>랜딩</u>이다.
+    세 개의 진입카드 — 자유문의(이해), 우리 조합(참여), 지도(현황) — 는 <strong>"어려운 말 → 쉽게 설명" / "남의 일 → 내 조합" / "추상 → 공간"</strong> 3 축을 커버.
+    동네 소식 / 최신뉴스는 플랫폼이 "아직 활동이 살아있다"는 신호용이며, 운영자 직접 등록 또는 자동 수집.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/home/feed?region=gokseong</code></td><td class="desc">동네 소식 (설명회·준비중 사업·참고사례)</td><td class="js">API.home.feed(region)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/home/news?region=gokseong</code></td><td class="desc">최신뉴스 (외부 언론 수집)</td><td class="js">API.home.news(region)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><span class="tag tag-cached">cached</span> 피드·뉴스는 5~15분 캐시. 자동수집이라 실시간성 낮음.</li>
+    <li><strong>home_feed_items.status</strong> — `pending`(예정)/`plan`(준비)/`run`(완료) 3가지로 UI 뱃지 매핑.</li>
+    <li>뉴스는 외부 URL 링크만 — 본문 저장 금지(저작권). 썸네일은 자체 스크레이핑 또는 OG 이미지.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="chat-free">
+  <header>
+    <h2>02. AI · 자유 문의 <span class="vkey">chat-free</span><span class="role resident">주민</span></h2>
+    <div class="onsight">퀵 질문 5개 + 자유 입력 · AI 답변 + 출처 칩</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> "재생에너지는 어렵다"는 진입장벽을 낮추기 위한 설명형 에이전트.
+    질문 5개(<em>태양광 장단점 · REC 쉬운 설명 · 곡성 히스토리 · 참여 3가지 방식 · 주민수용성</em>)는 <u>퍼널 앞단</u>을 설계하면서 실제로 가장 많이 나올 질문을 프리셋.
+    답변엔 반드시 <strong>출처 칩</strong>이 달려 "내 판단을 AI가 대신하는 게 아니라, AI가 나를 돕는다"는 신뢰감을 만든다.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/chat/free</code></td><td class="desc">질문 전송 → AI 답변 (RAG) <span class="tag tag-realtime">streaming 권장</span></td><td class="js">API.chat.ask(q, region)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="data-shape">Request:  { question: "REC가 뭔가요?", region: "gokseong" }
+Response: { data: { answer_html: "&lt;h4&gt;…&lt;/h4&gt;…", sources: ["곡성군 재생에너지 기본계획 (2026.02)", …] } }</div>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><span class="tag tag-third">3rd party</span> Claude/OpenAI + <code>documents</code> 테이블 기반 RAG. 문서는 운영자가 `admin-docs` 에서 업로드.</li>
+    <li><strong>answer_html</strong> — 서버에서 <u>sanitize 후</u> 전달. 허용 태그: `p, ul, ol, li, strong, em, h3, h4, dl, dt, dd`. script/iframe 금지.</li>
+    <li><strong>sources</strong> — 문자열 배열(출처 표시용). 클릭 시 문서 원문 이동이 필요하면 `{label, url, chunk}` 객체로 확장.</li>
+    <li><strong>로깅</strong> — 모든 질의는 <code>query_logs</code> 에 저장. 유사질문 클러스터링은 배치로 `canonical_question` 채움 → `admin-logs` 에서 활용.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="chat-haebit">
+  <header>
+    <h2>03. AI · 햇빛소득 진단 <span class="vkey">chat-haebit</span><span class="role resident">주민</span></h2>
+    <div class="onsight">9단계 진단 플로우 (주소 → 필지 지도 선택 → 토지/규제/일사/계통 자동조회 → 수용성 질문 → 예상 규모 → 최종)</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> "우리 마을에 태양광 되나요?" 질문을 <u>3분 안에</u> 답하는 셀프 진단.
+    핵심은 5단계의 <strong>자동조회 단계</strong>(토지·규제·일사·계통)에서 주민이 별도 자료 없이도 전문가 판단 근거를 얻을 수 있게 하는 것.
+    마지막 단계는 결과를 예상 용량·사업비·수익으로 환산해 <u>"다음 단계" 콜투액션</u>(조합 가입/에너지팀 상담)으로 연결.
+    <em>별도 프로덕트로 분리 가능성</em>을 고려해 사이드바에서도 독립 카테고리로 노출.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점 — 단계별</h3>
+  <table class="eps">
+    <thead><tr><th>단계</th><th>종류</th><th>엔드포인트</th><th>핵심 파라미터/응답</th></tr></thead>
+    <tbody>
+      <tr><td>—</td><td>부트</td><td><code>GET /api/haebit/flow</code></td><td>단계 정의 (9개 스텝 메타)</td></tr>
+      <tr><td>—</td><td><span class="meth POST">POST</span> 세션</td><td><code>/api/haebit/sessions</code></td><td>body: <code>{ region }</code> → <code>{ session_id }</code></td></tr>
+      <tr><td>1</td><td>input</td><td><code>PATCH /api/haebit/sessions/:id/steps/addr</code></td><td>body: <code>{ value: "고달면 두가리 산 23-1" }</code></td></tr>
+      <tr><td>2</td><td>map</td><td><code>GET /api/haebit/sessions/:id/lookup/parcels?addr=</code></td><td>응답: <code>[{ id, label, area_m2, land_use, use_ok }]</code></td></tr>
+      <tr><td>2</td><td>map</td><td><code>PATCH /api/haebit/sessions/:id/steps/parcels</code></td><td>body: <code>{ value: ["A","B","C"] }</code></td></tr>
+      <tr><td>3</td><td>auto</td><td><code>GET /api/haebit/sessions/:id/lookup/land-use</code></td><td>응답: <code>[["지목 구분","전·답 위주"], …]</code></td></tr>
+      <tr><td>4</td><td>auto</td><td><code>GET /api/haebit/sessions/:id/lookup/regulation</code></td><td>응답: <code>{ checks, verdict }</code></td></tr>
+      <tr><td>5</td><td>auto</td><td><code>GET /api/haebit/sessions/:id/lookup/solar</code></td><td>응답: <code>{ annual_kwh_m2_day, vs_national_pct, yearly_hours, mw_yield_mwh }</code></td></tr>
+      <tr><td>6</td><td>auto</td><td><code>GET /api/haebit/sessions/:id/lookup/grid</code></td><td>응답: <code>{ nearest_sub, distance_km, total_mw, residual_mw, feasible }</code></td></tr>
+      <tr><td>7</td><td>choice</td><td><code>PATCH /api/haebit/sessions/:id/steps/consent</code></td><td>body: <code>{ value: "high"|"mid"|"low"|"conflict" }</code></td></tr>
+      <tr><td>8</td><td>compute</td><td><em>클라이언트 산식</em></td><td>app.js <code>computeSummary()</code>: 면적/10 = kW, 1MW ≈ 14억 사업비 ≈ 2.2억/년 수익</td></tr>
+      <tr><td>9</td><td><span class="meth POST">POST</span></td><td><code>/api/haebit/sessions/:id/finalize</code></td><td>응답: <code>{ signal, capacity_mw, total_cost_eok, yearly_revenue_eok, fund_raise_eok, next_steps }</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><span class="tag tag-third">3rd party</span> <strong>lookup 계열</strong>은 외부 공공데이터 통합 — <u>VWORLD(지목), 농지은행, 임야정보, 기상청 일사량, 한전 계통정보</u>. 초기엔 곡성군 사전계산 CSV fixture 로 시작해도 OK.</li>
+    <li><strong>parcels</strong> — 현재 `MOCK_PARCELS` 7개는 1필지(A~G) SVG 도형. 실제 구현 시 WKT/GeoJSON 반환해 Leaflet 에 그림. 주소 → 인접 필지 lookup 알고리즘 필요.</li>
+    <li><strong>산식</strong>은 클라이언트 추정치 (면적 10㎡=1kW, 1MW=14억원=연 2.2억 수익). 정밀 계산이 필요해지면 서버 `finalize` 로 이동 권장.</li>
+    <li><strong>세션 저장</strong> — 단계별 PATCH 로 incremental 저장. 사용자가 중간에 이탈해도 이어하기 가능해야 함 (기획상 고려, UI 미구현).</li>
+    <li><strong>결과 CTA</strong> — 마지막 화면의 "협동조합 가입하기" 버튼이 실제 가입 플로우로 이어지려면 `coop/applications` POST 와 연결.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="dashboard">
+  <header>
+    <h2>04. 지역 대시보드 (지도) <span class="vkey">dashboard</span><span class="role resident">주민</span></h2>
+    <div class="onsight">Leaflet 지도 (ESRI satellite) · 4 레이어 · 좌측 사이드(프로필 + 레이어 토글 + 상위 5 면 + 주목 후보지) · 클릭 시 상세 drawer</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> "우리 군에 어디가 사업에 적합한가"를 한 장의 지도로 설명.
+    11개 법정면을 <strong>색상 온도(0-100 적합도)</strong>로 칠하고, 클릭하면 인구·계통·제약·진행사업까지 한 번에 본다.
+    부지 후보지는 별 핀 + 점수로 강조 — 주민이 "우리 동네에 이렇게 후보가 있다"를 체감하게 한다.
+    <em>적합도 산식</em> = 일사 25% + 계통 30% + 부지 25% + 수용성 20% (<code>app.js GS_EMDS.forEach</code>).
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions/:code/emds</code></td><td class="desc">법정면 11개 + 지표 4종 + suitability</td><td class="js">API.regions.emds(code)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions/:code/candidates</code></td><td class="desc">후보 부지 8곳</td><td class="js">API.regions.candidates(code)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions/:code/projects</code></td><td class="desc">진행 사업 (pilot/permit/operating)</td><td class="js">API.regions.projects(code)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions/:code/substations</code></td><td class="desc">변전소 4곳</td><td class="js">API.regions.substations(code)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/regions/:code/geojson</code></td><td class="desc">법정면 폴리곤 (EPSG:5186→WGS84) <span class="tag tag-cached">static</span></td><td class="js">API.regions.geojson(code)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>suitability 산식</strong>은 DB <u>GENERATED 컬럼</u> 또는 뷰로 처리 권장. 지표 업데이트 시 자동 재계산.</li>
+    <li><strong>`grid_residual_mw`</strong> 는 EMD → nearest_sub 매핑에서 <u>파생 캐시</u>. 변전소 업데이트 시 전파 배치 필요.</li>
+    <li><strong>지도 폴리곤</strong> — 현재 `GS_EMDS[].poly`(4점 사각형)은 프로토 fallback. 실제로는 `window.GOKSEONG_EMD_GEOJSON`(LSMD shapefile 변환)이 있으면 우선 사용. 배포 시 `/api/regions/:code/geojson` 정적 파일 CDN.</li>
+    <li><strong>호버 카드</strong>(md-hover) — 클라이언트 렌더링. 서버에서 별도 데이터 불필요.</li>
+    <li><strong>접근성</strong> — Leaflet 클릭 전용이므로 키보드 내비게이션은 좌측 "상위 5개 면 / 주목 후보지" 리스트로 대체.</li>
+  </ul>
+
+  <div class="note">
+    <strong>더미 vs 실제 —</strong> 지표 4종(solar/grid/land/accept)은 현재 수작업 점수. 실 배포 단계에서는
+    ① 기상청 일사량, ② 한전 KEPCO API (계통잔여), ③ VWORLD 토지이용 통계, ④ 설문·조합원 밀도 기반 계산기
+    로 교체 필요. 교체 전까지는 주기적(월 1회) 수동 업데이트로 운영.
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="coop">
+  <header>
+    <h2>05. 내 조합 <span class="vkey">coop</span><span class="role resident">주민</span></h2>
+    <div class="onsight">내 자산(출자금/펀드/지급받음) → 배당 차트 + 수령 내역표 → 내 참여 사업 진행률 → 공지/총회 + 블록체인 활동 기록</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> "돈이 어디서 얼마나 들어왔고, 어디로 가고 있는가"를 <u>조합원 본인 관점으로</u> 보여주는 페이지.
+    배당이 <strong>곡성사랑상품권으로 전액 수령</strong>됨을 반복 노출해 지역 환류 구조를 학습시킴.
+    하단 "블록체인 원장 기반 · 변경 불가" 카피는 <strong>신뢰성 축</strong>이므로 기능 구현 여부와 별개로 UX상 필수.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/me</code></td><td class="desc">히어로 + 3카드 (출자금/펀드/지급받음)</td><td class="js">API.coop.me()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/me/dividends</code></td><td class="desc">수령 내역표 (분기별 배당+이자)</td><td class="js">API.coop.myDividends()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/me/projects</code></td><td class="desc">내 참여 사업 진행률</td><td class="js">API.coop.myProjects()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/me/activity</code></td><td class="desc">블록체인 활동 로그 <span class="tag tag-ledger">ledger</span></td><td class="js">API.coop.myActivity()</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>`coop/me` 는 aggregate 엔드포인트</strong>. 내부적으로 <code>coop_members</code> + <code>coop_contributions</code> + <code>fund_investments</code> + <code>dividends</code> 합산.</li>
+    <li><strong>`preferred_method: 'VOUCHER'`</strong> 가 응답에 있으면 UI에 "전액 곡성사랑상품권"으로 표기. 지역별로 꺼져있으면 자동 `CASH` fallback.</li>
+    <li><strong>활동 로그</strong>는 append-only. `tx_hash` 는 블록체인 연동 전엔 null, 연동 후 채움.</li>
+    <li><span class="tag tag-realtime">realtime</span> 배당 흐름 차트는 월별 aggregate. 캐시 5분 OK.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="coop-members">
+  <header>
+    <h2>06. 조합원 명부 <span class="vkey">coop-members</span><span class="role resident">주민/조합</span></h2>
+    <div class="onsight">명부 테이블(검색+거리/상태 필터+페이지네이션) · 승인 대기 카드 · 출자금/배당 요약</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 조합원이 <u>다른 조합원을 볼 수 있어야</u> 조합이 실재한다는 감각이 생긴다.
+    다만 개인정보 보호를 위해 <strong>이름·생년·주소(동리 단위)·거리구분·출자금·전년 배당</strong>만 노출 — 전화번호·계좌·상세주소는 뺀다.
+    "거리 구분(ADJACENT/NEARBY/GENERAL)"은 발전소 기준 500m/1km로 이익 분배 비율을 정하는 핵심 필드.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/members?q=&distance=&status=&page=</code></td><td class="desc">명부 (필터·페이지) + summary meta</td><td class="js">API.coop.members(q,filters)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/members/summary</code></td><td class="desc">총 출자금 · 1인 평균 · 다음 배당 · 감사 승인</td><td class="js">API.coop.membersSummary()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/members/applications</code></td><td class="desc">승인 대기 3건</td><td class="js">API.coop.pendingApps()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/coop/members</code></td><td class="desc">"+ 신규 등록" 버튼 <span class="tag tag-write">write</span></td><td class="js">API.coop.registerMember(body)</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/coop/members/applications/:id/approve</code></td><td class="desc">승인 버튼 <span class="tag tag-write">write</span></td><td class="js">API.coop.approveApp(id)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>엑셀 내보내기</strong> — `feature_flags.excel_export_enabled` 가 ON 일 때만 버튼 노출. 서버 generate 후 presigned URL.</li>
+    <li><strong>이름/주소 마스킹</strong> — 현재 프로토는 풀 노출. 실 배포 시 기본 <u>부분 마스킹</u>으로 전환, "상세" 버튼에서만 풀노출(권한 체크).</li>
+    <li><strong>필터</strong> — `distance` ∈ {ADJACENT, NEARBY, GENERAL}, `status` ∈ {ACTIVE, PENDING, SUSPENDED, WITHDRAWN}.</li>
+    <li><strong>승인</strong>은 2인 승인이 필요할 수 있음 (정관 확인 필요). 현재 프로토는 1회 클릭으로 `PENDING→ACTIVE`.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="coop-vote">
+  <header>
+    <h2>07. 총회 · 의결 <span class="vkey">coop-vote</span><span class="role resident">조합원</span></h2>
+    <div class="onsight">진행 중 투표 카드(정족수+찬반기권 실시간) · 다음 안건 4건 · 과거 의결 기록</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 정기총회 현장에 오지 못해도 조합원이 <u>전자 투표로 의사결정에 참여</u>할 수 있게.
+    투표 결과는 <strong>블록체인 원장</strong>에 해시로 기록 — 사후 분쟁/감사 시 변경 여부를 검증할 수 있음.
+    "24시간 이내 1회 변경 가능" 규칙은 실수한 투표를 되돌릴 여유를 주되 무한 변경으로 혼란이 생기지 않도록 한 장치.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/votes/current</code></td><td class="desc">진행중 안건 · 정족수 · 실시간 집계 <span class="tag tag-realtime">realtime</span></td><td class="js">API.coop.votes.current()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/votes/agenda</code></td><td class="desc">이번 총회 전체 안건 4건</td><td class="js">API.coop.votes.agenda()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/coop/votes/history</code></td><td class="desc">과거 의결 기록</td><td class="js">API.coop.votes.history()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/coop/votes/:id/ballot</code></td><td class="desc">투표 / 변경 <span class="tag tag-write">write</span><span class="tag tag-ledger">ledger</span></td><td class="js">API.coop.votes.cast(id, choice)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>상태머신</strong> — <code>votes.status</code>: `PENDING(예정)` → `ACTIVE(진행중)` → `PASSED/REJECTED/EXPIRED`.</li>
+    <li><strong>정족수</strong> — `quorum_required` = 안건 시작 시점의 ACTIVE 조합원 수 스냅샷. 이후 가입자는 영향 없음.</li>
+    <li><strong>변경 창</strong> — `vote_ballots.changeable_until` = `cast_at + 24h` 또는 `deadline_at` 중 이른 쪽. 이 시각 이전에만 POST 재호출 허용, 이후는 409.</li>
+    <li><strong>실시간 집계</strong> — 폴링 10초 / WebSocket. 정족수 도달 시 UI에 "정족수 충족" 뱃지 즉시 갱신.</li>
+    <li><strong>my_choice</strong> 필드로 "내 투표" 하이라이트.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="admin-home">
+  <header>
+    <h2>08. 운영 대시보드 <span class="vkey">admin-home</span><span class="role admin">운영자</span></h2>
+    <div class="onsight">4개 KPI 카드(MAU/인증완료/일평균 AI 질의/햇빛 진단 완료) · 주간 질의 추이 차트 · 상위 질문 카테고리</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 곡성군청 에너지팀 주무관이 <u>주 1회 열어 보기 좋은 형태</u>로.
+    KPI는 <strong>목표 대비 달성률</strong>이 한눈에 보이도록 (500 목표 → 612 달성 ✓ 같은 형태).
+    상위 질문 카테고리는 <u>다음 주 해야 할 일</u>(FAQ 승격·용어 콘텐츠 보강) 힌트 역할.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/kpis?region=</code></td><td class="desc">4개 KPI + 주간 추이 7일</td><td class="js">API.admin.kpis(region)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/queries/top</code></td><td class="desc">상위 질문 4건 (유사질문 클러스터)</td><td class="js">API.admin.topQueries()</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li>KPI는 <code>app_kpi_daily</code> 집계 테이블에서 조회. 야간 배치(00:30)에 전일자 기록.</li>
+    <li><strong>목표(goal)</strong>는 설정값 — `region_kpi_goals` 류 테이블이 필요하거나 설정 YAML.</li>
+    <li><strong>"보고서 다운"</strong> 버튼 — `/api/admin/reports/monthly` 로 PDF/Excel 생성. 구현 시기 미정.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="admin-docs">
+  <header>
+    <h2>09. 운영 · 문서 관리 <span class="vkey">admin-docs</span><span class="role admin">운영자</span></h2>
+    <div class="onsight">드래그&드롭 업로드 박스 · 최근 문서 리스트 (청크 수·질의 횟수·L0~L3 공개범위)</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> AI 답변의 품질은 RAG 문서 품질로 결정된다는 전제에서, <u>운영자가 직접 문서를 관리하는 화면</u>.
+    공개 범위 `L0~L3` 는 문서가 어느 권한까지 노출되는지 통제 — 내부 회의록(L3)이 주민 질문에 인용되면 안 된다.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/docs</code></td><td class="desc">문서 리스트 + 메타</td><td class="js">API.admin.docs.list()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/admin/docs</code> (multipart)</td><td class="desc">업로드 → 비동기 색인 <span class="tag tag-write">write</span></td><td class="js">API.admin.docs.upload(file)</td></tr>
+      <tr><td><span class="meth PATCH">PATCH</span></td><td><code>/api/admin/docs/:id/visibility</code></td><td class="desc">공개 범위 변경</td><td class="js">API.admin.docs.setVisibility(id,level)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>파일 타입</strong> — PDF, HWP, DOCX, XLSX. HWP 파싱은 외부 라이브러리/서비스 필요 (<em>한글과컴퓨터 Converter API</em> 등).</li>
+    <li><strong>색인 상태</strong> — `documents.status`: `uploaded → indexing → indexed`(또는 failed). 업로드 직후엔 `indexing` 으로 리스트에 표시되어야 함.</li>
+    <li><strong>공개 범위</strong> — `L0`(공개) / `L1`(회원) / `L2`(주민전용) / `L3`(어드민). RAG 질의 시 <u>사용자 권한 기준으로 필터</u>.</li>
+    <li><strong>questions_hit</strong> — 해당 문서가 `chat_messages.sources` 에 인용된 횟수. 배치로 카운트 업데이트.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="admin-logs">
+  <header>
+    <h2>10. 운영 · 질의 로그 <span class="vkey">admin-logs</span><span class="role admin">운영자</span></h2>
+    <div class="onsight">최근 7일 질의 로그 · 유사질문 수 · 만족도 · "FAQ로 승격" 일괄 액션</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 자주 나오는 질문을 FAQ로 승격해 답변 일관성을 높이고, 운영자가 AI 답변 품질을 간헐적 샘플링 없이 <u>통계적으로 파악</u>할 수 있도록.
+    만족도는 5점 척도(답변 하단 👍/👎 집계), 일관성 점검 플래그는 "같은 질문인데 답변이 다르다"는 케이스 감지용.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/queries/logs?from=&to=</code></td><td class="desc">유사질문 클러스터별 집계</td><td class="js">API.admin.queryLogs(range)</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/admin/queries/:id/promote</code></td><td class="desc">FAQ 승격 <span class="tag tag-write">write</span></td><td class="js">API.admin.promoteToFaq(id,body)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>클러스터링</strong> — `query_logs.canonical_question` 배치 채움 (임베딩 유사도 > 0.85 같은 기준). 리스트는 canonical 기준 group by.</li>
+    <li><strong>FAQ 승격</strong> — `faqs` 레코드 생성 + `query_logs.promoted_from_query_id` 링크. 승격 후 동일 canonical 질의는 FAQ를 우선 인용.</li>
+  </ul>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<section class="view" id="admin-coop">
+  <header>
+    <h2>11. 운영 · 조합 운영 <span class="vkey">admin-coop</span><span class="role admin">운영자</span></h2>
+    <div class="onsight">4 KPI · <strong>배당 집행 파이프라인 (4단계 상태머신)</strong> · 명부 변경 로그 · 상품권 집행 준비 · 기능 플래그</div>
+  </header>
+
+  <p class="intent">
+    <strong>기획의도 —</strong> 이 화면이 <u>플랫폼 가치의 핵심</u>. 기존에 엑셀로 하던 배당 계산 · 승인 · 이체 프로세스를 앱 안에서 감사 가능한 상태머신으로 처리.
+    <strong>2인 승인</strong>(조합장 + 감사)이 파이프라인의 안전장치.
+    <strong>지역화폐 API 자동 연동</strong>으로 현금 이체 대신 곡성사랑상품권 일괄 발행 — 주민에게는 +3% 가산 혜택, 지역에는 환류 효과.
+  </p>
+
+  <h3 class="bl"><span class="ic">🔀</span>상태머신 — 배당 집행 파이프라인</h3>
+  <div class="data-shape">  DRAFT(계산 완료)
+    ↓ 자동: 월초 배치에서 period_end 도달 시
+  REVIEW(조합장 검토)
+    ↓ POST /api/admin/coop/dividends/:id/approve  (chair 역할 필요)
+  APPROVED(감사 서명 대기)
+    ↓ POST /api/admin/coop/dividends/:id/audit-sign  (auditor 역할 필요)
+  PAID(이체 파일 생성 + 상품권 API 일괄 발행)
+</div>
+
+  <h3 class="bl"><span class="ic">🔗</span>API 연결지점</h3>
+  <table class="eps">
+    <thead><tr><th>메서드</th><th>엔드포인트</th><th>용도</th><th>api.js</th></tr></thead>
+    <tbody>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/coop/dividends/current</code></td><td class="desc">진행중 period + 승인 상태</td><td class="js">API.admin.dividend.pipeline()</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/admin/coop/dividends/:id/approve</code></td><td class="desc">조합장 승인 <span class="tag tag-write">write</span></td><td class="js">API.admin.dividend.approve(id)</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/admin/coop/dividends/:id/audit-sign</code></td><td class="desc">감사 서명 <span class="tag tag-write">write</span></td><td class="js">API.admin.dividend.auditSign(id)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/coop/dividends/:id/transfer-file</code></td><td class="desc">이체 파일 미리보기(엑셀)</td><td class="js">API.admin.dividend.transferFile(id)</td></tr>
+      <tr><td><span class="meth POST">POST</span></td><td><code>/api/admin/coop/dividends/:id/notify</code></td><td class="desc">조합원에게 안내 발송</td><td class="js">API.admin.dividend.notifyMembers(id)</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/coop/member-logs</code></td><td class="desc">명부 변경 로그 <span class="tag tag-ledger">ledger</span></td><td class="js">API.admin.memberLogs()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/voucher/batch/current</code></td><td class="desc">상품권 배치 준비 현황 <span class="tag tag-third">외부 API</span></td><td class="js">API.admin.voucherBatch()</td></tr>
+      <tr><td><span class="meth GET">GET</span></td><td><code>/api/admin/flags</code></td><td class="desc">기능 플래그 6개</td><td class="js">API.admin.flags.list()</td></tr>
+      <tr><td><span class="meth PUT">PUT</span></td><td><code>/api/admin/flags/:key</code></td><td class="desc">on/off <span class="tag tag-write">write</span></td><td class="js">API.admin.flags.set(key,enabled)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="bl"><span class="ic">🧰</span>부가 스펙</h3>
+  <ul class="bullets">
+    <li><strong>2인 승인 제약</strong> — DB CHECK: `state='PAID'` 는 `chair_approved_at AND auditor_signed_at` 모두 NOT NULL 이어야 함. 애플리케이션 레벨에서도 중복 체크.</li>
+    <li><strong>권한 분리</strong> — `chair` 와 `auditor` 는 서로 다른 user 여야 함 (RBAC 체크 필수). 현재 프로토에는 미구현.</li>
+    <li><strong>이체 파일</strong> — 전자금융 표준 포맷(ERP 연동용 Excel) 생성. 정확한 스펙은 조합이 사용하는 은행 업체에 따라 다름 — 곡성군민에너지협동조합 기준 확인 필요.</li>
+    <li><strong>지역화폐 API</strong> — 곡성사랑상품권 발행 외부 API 연동. `feature_flags.voucher_api_enabled` OFF 시 자동 CASH fallback.</li>
+    <li><strong>기능 플래그</strong> — `feature_flags` 테이블 (coop_id 단위). 코드 배포 없이 on/off 가능. UI 카드는 PUT 즉시 반영.</li>
+    <li><strong>명부 변경 로그</strong> — `activity_logs` 중 `actor_kind='admin'` + member 관련 action 필터링. 해시 `tx_hash` 는 블록체인 연동 후 채움.</li>
+  </ul>
+
+  <div class="note">
+    <strong>외부 의존성 체크리스트 —</strong>
+    ① 은행 ERP 업무양식(이체 파일) ·
+    ② 곡성군 지역화폐 API 명세 ·
+    ③ 블록체인 원장(가칭 프라이빗 체인 or Hyperledger) ·
+    ④ 감사 서명 도구(전자서명 인증서 or 회계법인 API). 현 프로토타입에서는 모두 모킹.
+  </div>
+</section>
+
+<footer class="bottom">
+  로컬에너지 플랫폼 · 루트에너지 &amp; 곡성군청 · 2026-04-23 · <code>docs/handoff.html</code>
+</footer>
+
+</div>
+</body>
+</html>

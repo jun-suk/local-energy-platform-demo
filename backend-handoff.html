@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에너지히어로 · 백엔드 핸드오프 — 곡성군</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="styles.css?v=4">
+
+<style>
+  /* ── 상단 핸드오프 배너 ───────────────────────── */
+  .hb-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 1px solid #f59e0b; padding: 8px 20px;
+    font-size: 12.5px; font-weight: 500; color: #78350f;
+    text-align: center; letter-spacing: -0.1px;
+  }
+  .hb-banner strong { color: #92400e; margin-right: 6px; }
+  .hb-banner .tag {
+    display: inline-block; background: #92400e; color: #fef3c7;
+    font-size: 10px; font-weight: 700; padding: 1px 6px;
+    border-radius: 4px; margin: 0 6px; letter-spacing: 0.05em;
+  }
+  body { padding-top: 36px; }
+
+  /* ── 사이드바 계정 시뮬레이터 ─────────────────── */
+  .bh-levelsim {
+    margin: 10px 12px 14px; padding: 12px;
+    background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+    border: 1px solid #fde68a; border-radius: 10px;
+  }
+  .bh-levelsim-t {
+    font-size: 10.5px; font-weight: 700; color: #92400e;
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .bh-levels { display: flex; flex-direction: column; gap: 4px; }
+  .bh-levels button {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; background: #fff; border: 1px solid var(--ink-100);
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+    font-size: 12px; color: var(--ink-700); text-align: left;
+    transition: all 0.15s;
+  }
+  .bh-levels button:hover { border-color: var(--blue-500); background: var(--blue-50); }
+  .bh-levels button.active {
+    background: var(--blue-700); color: #fff; border-color: var(--blue-700);
+    font-weight: 600;
+  }
+  .bh-levels .ic { font-size: 14px; }
+  .bh-levels .meta { flex: 1; }
+  .bh-levels .n { font-size: 12px; font-weight: 600; }
+  .bh-levels button:not(.active) .n { color: var(--ink-900); }
+  .bh-levels .s { font-size: 10.5px; color: var(--ink-500); margin-top: 1px; }
+  .bh-levels button.active .s { color: #BFDBFE; }
+
+  /* 레벨 배지 (탑바 우측) */
+  .bh-level-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 100px; margin-right: 8px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em;
+  }
+  .bh-level-badge.guest  { background: var(--ink-100); color: var(--ink-700); }
+  .bh-level-badge.member { background: #DCFCE7;       color: #166534; }
+  .bh-level-badge.admin  { background: #FEF3C7;       color: #92400E; }
+
+  /* ── 가입 플로우 공통 ───────────────────────── */
+  .jn-progress {
+    display: flex; gap: 4px; background: var(--ink-50);
+    border-radius: 12px; padding: 6px; margin-bottom: 22px;
+  }
+  .jn-progress button {
+    flex: 1; padding: 10px 12px; background: transparent; border: none;
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 500; color: var(--ink-500);
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all 0.18s;
+  }
+  .jn-progress button .n {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--ink-200); color: #fff;
+    font-size: 10.5px; font-weight: 700; line-height: 18px;
+    display: inline-block; text-align: center;
+  }
+  .jn-progress button.done { color: var(--ink-700); }
+  .jn-progress button.done .n { background: var(--ok); }
+  .jn-progress button.current {
+    background: #fff; color: var(--blue-700); font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .jn-progress button.current .n { background: var(--blue-700); }
+
+  .jn-hero {
+    padding: 36px 32px; text-align: center;
+    background: radial-gradient(ellipse at top, rgba(219,234,254,0.5) 0%, transparent 60%);
+    border: 1px solid var(--ink-100); border-radius: 16px;
+    margin-bottom: 18px;
+  }
+  .jn-hero .ico { font-size: 42px; margin-bottom: 10px; }
+  .jn-hero h2 {
+    font-size: 22px; font-weight: 800; color: var(--ink-900);
+    letter-spacing: -0.5px; margin: 0 0 6px;
+  }
+  .jn-hero p { font-size: 13.5px; color: var(--ink-500); margin: 0; }
+
+  /* 초대 코드 */
+  .jn-code {
+    display: flex; justify-content: center; gap: 8px;
+    padding: 18px 0 6px;
+  }
+  .jn-code input {
+    width: 44px; height: 54px; text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px; font-weight: 700; color: var(--blue-700);
+    border: 2px solid var(--blue-500); border-radius: 10px;
+    background: var(--blue-50); outline: none;
+  }
+  .jn-code-lbl {
+    text-align: center; font-size: 12px; color: var(--ink-500); margin-top: 6px;
+  }
+
+  /* 인증 스텝 */
+  .jn-auth-step {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px; background: #fff;
+    border: 1px solid var(--ink-100); border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .jn-auth-step.done { background: rgba(16,185,129,0.04); border-color: rgba(16,185,129,0.3); }
+  .jn-auth-step .ic {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--ink-50); color: var(--ink-500);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .jn-auth-step.done .ic { background: var(--ok); color: #fff; }
+  .jn-auth-step .meta { flex: 1; }
+  .jn-auth-step .n { font-size: 13.5px; font-weight: 600; color: var(--ink-900); }
+  .jn-auth-step .s { font-size: 12px; color: var(--ink-500); margin-top: 2px; }
+  .jn-auth-step .jn-btn {
+    padding: 8px 16px; border-radius: 100px; border: none;
+    background: var(--blue-700); color: #fff;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .jn-auth-step.done .jn-btn { display: none; }
+  .jn-auth-step .done-tag {
+    font-size: 11px; font-weight: 700; color: var(--ok); letter-spacing: 0.03em;
+  }
+  .jn-auth-step:not(.done) .done-tag { display: none; }
+
+  /* 출자금 금액 선택 */
+  .jn-amounts {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 10px; margin: 14px 0 18px;
+  }
+  .jn-amount {
+    padding: 18px 12px; text-align: center;
+    background: #fff; border: 2px solid var(--ink-100); border-radius: 12px;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .jn-amount:hover { border-color: var(--blue-500); }
+  .jn-amount.on {
+    background: var(--blue-50); border-color: var(--blue-700);
+    box-shadow: 0 4px 12px rgba(29,78,216,0.12);
+  }
+  .jn-amount .v {
+    font-size: 18px; font-weight: 800; color: var(--ink-900);
+    letter-spacing: -0.5px;
+  }
+  .jn-amount.on .v { color: var(--blue-700); }
+  .jn-amount .s { font-size: 10.5px; color: var(--ink-500); margin-top: 3px; }
+  .jn-amount .rec {
+    display: inline-block; font-size: 9.5px; font-weight: 700;
+    background: var(--ok); color: #fff; padding: 1px 6px;
+    border-radius: 4px; margin-top: 4px; letter-spacing: 0.05em;
+  }
+
+  .jn-pay-methods { display: flex; gap: 10px; margin: 10px 0; }
+  .jn-pay-method {
+    flex: 1; padding: 16px; border: 2px solid var(--ink-100);
+    border-radius: 10px; cursor: pointer; text-align: center; background: #fff;
+  }
+  .jn-pay-method:hover { border-color: var(--blue-500); }
+  .jn-pay-method.on { background: var(--blue-50); border-color: var(--blue-700); }
+  .jn-pay-method .ti { font-size: 13px; font-weight: 700; color: var(--ink-900); }
+  .jn-pay-method .de { font-size: 11.5px; color: var(--ink-500); margin-top: 4px; }
+
+  .jn-vacct {
+    padding: 16px 20px; background: #0F172A; color: #e2e8f0;
+    border-radius: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;
+    line-height: 1.75; margin-top: 10px;
+  }
+  .jn-vacct .acct { color: #FDE68A; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+
+  /* 가입 완료 */
+  .jn-done {
+    padding: 48px 32px; text-align: center;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1px solid rgba(16,185,129,0.3); border-radius: 16px;
+  }
+  .jn-done .big-ic { font-size: 56px; margin-bottom: 16px; }
+  .jn-done h2 {
+    font-size: 26px; font-weight: 800; color: #065F46;
+    letter-spacing: -0.5px; margin: 0 0 8px;
+  }
+  .jn-done p { font-size: 14px; color: #047857; margin: 0 0 22px; }
+  .jn-done .member-card {
+    display: inline-block; padding: 18px 28px; background: #fff;
+    border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 22px; text-align: left;
+  }
+  .jn-done .member-card .l { font-size: 11px; color: var(--ink-500); }
+  .jn-done .member-card .v {
+    font-family: 'IBM Plex Mono', monospace; font-size: 22px;
+    font-weight: 800; color: var(--ink-900); letter-spacing: 0.04em;
+  }
+
+  /* ── 스텝 푸터 ─────────────────────────────── */
+  .jn-foot {
+    margin-top: 22px; padding-top: 18px;
+    display: flex; justify-content: space-between; gap: 10px;
+    border-top: 1px solid var(--ink-100);
+  }
+  .jn-foot .rt { display: flex; gap: 10px; }
+
+  /* ── coop-onboard (기존 유지) ───────────────── */
+  .ob-steps {
+    display: flex; gap: 4px; background: var(--ink-50);
+    border-radius: 12px; padding: 6px; margin-bottom: 20px;
+  }
+  .ob-steps button {
+    flex: 1; padding: 11px 14px; background: transparent; border: none;
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+    font-size: 12.5px; font-weight: 500; color: var(--ink-500);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .ob-steps button .n {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--ink-200); color: #fff;
+    font-size: 11px; font-weight: 700; line-height: 20px;
+    display: inline-block; text-align: center;
+  }
+  .ob-steps button.done { color: var(--ink-700); }
+  .ob-steps button.done .n { background: var(--ok); }
+  .ob-steps button.current {
+    background: #fff; color: var(--blue-700); font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .ob-steps button.current .n { background: var(--blue-700); }
+  .ob-panel { display: none; }
+  .ob-panel.active { display: block; }
+  .ob-drop {
+    border: 2px dashed var(--ink-200); border-radius: 10px;
+    padding: 32px 20px; text-align: center; background: var(--ink-50);
+  }
+  .ob-drop-ic { font-size: 28px; opacity: 0.4; }
+  .ob-drop-title { font-size: 13.5px; font-weight: 600; color: var(--ink-900); margin-top: 10px; }
+  .ob-drop-sub { font-size: 11.5px; color: var(--ink-500); margin-top: 4px; }
+  .ob-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .ob-summary-cell { padding: 12px 14px; background: var(--ink-25); border-radius: 8px; border: 1px solid var(--ink-100); }
+  .ob-summary-cell .l { font-size: 11px; color: var(--ink-500); }
+  .ob-summary-cell .v { font-size: 20px; font-weight: 700; color: var(--ink-900); margin-top: 2px; line-height: 1.1; }
+  .ob-summary-cell .v .u { font-size: 11.5px; font-weight: 400; color: var(--ink-500); margin-left: 2px; }
+
+  /* 네비 섹션 제목 */
+  .bh-nav-sect {
+    font-size: 10.5px; font-weight: 700; color: var(--ink-400);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 14px 14px 6px;
+  }
+</style>
+</head>
+<body data-variant="default">
+
+<div class="hb-banner">
+  🔧 <strong>개발자 핸드오프 버전</strong> <span class="tag">HANDOFF</span>
+  스코프 — 가입 플로우 · 우리 조합 · 운영 대시보드 · <strong>계정 레벨 시뮬레이터</strong>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26"><circle cx="16" cy="16" r="16" fill="#fff"/><path d="M16 8c-4 0-7 3-7 7 0 3 2 5 4 6v2h6v-2c2-1 4-3 4-6 0-4-3-7-7-7z M13 25h6" stroke="#1D4ED8" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">에너지히어로</div>
+        <div class="brand-sub">곡성군 · 백엔드 핸드오프</div>
+      </div>
+    </div>
+
+    <!-- 계정 레벨 시뮬레이터 -->
+    <div class="bh-levelsim">
+      <div class="bh-levelsim-t">계정 레벨 시뮬레이터</div>
+      <div class="bh-levels" id="bh-levels">
+        <button data-lv="guest"  onclick="bhSwitchLevel('guest')">
+          <span class="ic">👤</span>
+          <span class="meta"><span class="n">비회원</span><span class="s">초대코드 받음 상태</span></span>
+        </button>
+        <button data-lv="member" onclick="bhSwitchLevel('member')">
+          <span class="ic">🤝</span>
+          <span class="meta"><span class="n">조합원</span><span class="s">가입·출자금 납부 완료</span></span>
+        </button>
+        <button data-lv="admin"  onclick="bhSwitchLevel('admin')">
+          <span class="ic">🛡</span>
+          <span class="meta"><span class="n">운영자</span><span class="s">CORP_ADMIN · 곡성군</span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 동적 네비 (레벨에 따라 재렌더) -->
+    <nav id="bh-nav"></nav>
+
+    <div class="sb-foot">
+      <div class="sb-powered">
+        <span>powered by</span>
+        <img src="assets/rootenergy-logo.png" alt="ROOTENERGY" class="rootlogo"/>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="bc">
+        <span id="bc-leaf">—</span>
+      </div>
+      <div class="tb-actions">
+        <span class="bh-level-badge" id="bh-level-badge">👤 비회원</span>
+        <button class="btn-icon" title="알림">
+          <svg viewBox="0 0 16 16" width="16" height="16"><path d="M4 11c0-4 1.5-7 4-7s4 3 4 7H4z M7 13h2" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="content" id="content"></section>
+
+    <footer class="app-foot">
+      <div class="foot-l">
+        <div class="foot-tagline">지역주민과 함께 만드는 재생에너지 — 로컬에너지 플랫폼</div>
+        <div class="foot-copy">© 2026 루트에너지 · 곡성군청 에너지정책팀</div>
+      </div>
+      <div class="foot-r">
+        <div class="foot-by">운영</div>
+        <img src="assets/rootenergy-logo.png" alt="ROOTENERGY" class="rootlogo-lg"/>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- 데이터 파일 -->
+<script src="gokseong-emd.js"></script>
+<script src="char-data.js"></script>
+<script src="bg-data.js"></script>
+<script src="app.js?v=3"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     backend-handoff 전용 로직 — 계정 레벨 + 가입 플로우 신규 뷰
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+  // ─── 계정 레벨 상태 ──────────────────────
+  window.__bh = {
+    level: 'guest',       // 'guest' | 'member' | 'admin'
+    join: {
+      step: 1,            // 1..5
+      code: 'ABC123',
+      kakaoOk: false,
+      passOk: false,
+      residenceOk: false,
+      amount: 1000000,    // 기본 선택 금액 (원)
+      method: 'transfer', // 'transfer' | 'vacct'
+    },
+  };
+
+  // ─── 네비 매핑 (레벨별) ──────────────────
+  const BH_NAV = {
+    guest: [{
+      title: '가입 플로우',
+      items: [
+        { view:'join-code',      label:'1. 초대 코드 확인',  ic:'🎟' },
+        { view:'join-auth',      label:'2. 본인인증',         ic:'🔐' },
+        { view:'join-residence', label:'3. 거주지 증빙',      ic:'📍' },
+        { view:'join-payment',   label:'4. 출자금 납부',      ic:'💳' },
+        { view:'join-done',      label:'5. 가입 완료',        ic:'✨' },
+      ],
+    }],
+    member: [{
+      title: '우리 조합',
+      items: [
+        { view:'coop',         label:'조합 현황',        ic:'🏠' },
+        { view:'coop-members', label:'조합원 명부',      ic:'📋' },
+        { view:'coop-vote',    label:'총회 · 의결',      ic:'🗳' },
+      ],
+    }],
+    admin: [{
+      title: '운영',
+      items: [
+        { view:'admin-home',   label:'운영 대시보드',     ic:'📊' },
+        { view:'admin-coop',   label:'조합 운영 · 배당',  ic:'💼' },
+        { view:'coop-onboard', label:'조합원 온보딩',     ic:'⬆' },
+        { view:'admin-docs',   label:'문서 관리',         ic:'📄' },
+        { view:'admin-logs',   label:'질의 로그',         ic:'📝' },
+      ],
+    }, {
+      title: '읽기 전용 (조합원 시점)',
+      items: [
+        { view:'coop',         label:'조합 현황',        ic:'🏠' },
+        { view:'coop-members', label:'조합원 명부',      ic:'📋' },
+        { view:'coop-vote',    label:'총회 · 의결',      ic:'🗳' },
+      ],
+    }],
+  };
+
+  const LEVEL_DEFAULT_VIEW = {
+    guest:  'join-code',
+    member: 'coop',
+    admin:  'admin-home',
+  };
+
+  // ─── breadcrumb titles (기존 viewTitles 확장) ──
+  if (typeof viewTitles === 'object') {
+    viewTitles['join-code']      = ['가입', '초대 코드 확인'];
+    viewTitles['join-auth']      = ['가입', '본인인증'];
+    viewTitles['join-residence'] = ['가입', '거주지 증빙'];
+    viewTitles['join-payment']   = ['가입', '출자금 납부'];
+    viewTitles['join-done']      = ['가입', '완료'];
+    viewTitles['coop-onboard']   = ['운영', '조합원 온보딩'];
+  }
+
+  // ─── 사이드바 네비 렌더 ──────────────────
+  function bhRenderNav() {
+    const lv = window.__bh.level;
+    const groups = BH_NAV[lv];
+    const curView = (typeof state === 'object' ? state.view : null);
+    const html = groups.map(g => `
+      <div class="bh-nav-sect">${g.title}</div>
+      ${g.items.map(it => `
+        <a class="nav-item ${curView === it.view ? 'active' : ''}"
+           data-view="${it.view}"
+           onclick="go('${it.view}')">
+          <span class="nav-ic" style="font-size:14px;">${it.ic}</span>
+          ${it.label}
+        </a>`).join('')}
+    `).join('');
+    document.getElementById('bh-nav').innerHTML = html;
+
+    // 레벨 버튼 토글
+    document.querySelectorAll('#bh-levels button').forEach(b => {
+      b.classList.toggle('active', b.dataset.lv === lv);
+    });
+
+    // 레벨 배지
+    const badge = document.getElementById('bh-level-badge');
+    const meta = { guest:['👤 비회원','guest'], member:['🤝 조합원','member'], admin:['🛡 운영자 (CORP_ADMIN)','admin'] }[lv];
+    badge.textContent = meta[0];
+    badge.className = 'bh-level-badge ' + meta[1];
+  }
+
+  function bhSwitchLevel(lv) {
+    window.__bh.level = lv;
+    bhRenderNav();
+    go(LEVEL_DEFAULT_VIEW[lv]);
+  }
+
+  // renderView 를 훅해서 네비 active 상태 동기화
+  if (typeof renderView === 'function') {
+    const _rv = renderView;
+    window.renderView = function () { _rv(); bhRenderNav(); };
+  }
+
+  // ═══════════════════════════════════════════════════
+  // 가입 플로우 뷰
+  // ═══════════════════════════════════════════════════
+
+  function jnProgress(curStep) {
+    const steps = [
+      { k:1, l:'코드'   },
+      { k:2, l:'인증'   },
+      { k:3, l:'거주지' },
+      { k:4, l:'출자금' },
+      { k:5, l:'완료'   },
+    ];
+    return `<div class="jn-progress">
+      ${steps.map(s => {
+        const cls = s.k === curStep ? 'current' : s.k < curStep ? 'done' : '';
+        return `<button class="${cls}" onclick="jnGoStep(${s.k})"><span class="n">${s.k}</span>${s.l}</button>`;
+      }).join('')}
+    </div>`;
+  }
+
+  function jnGoStep(n) {
+    window.__bh.join.step = n;
+    const viewKey = ['join-code','join-auth','join-residence','join-payment','join-done'][n-1];
+    go(viewKey);
+  }
+
+  views['join-code'] = () => {
+    const code = window.__bh.join.code;
+    return `
+      <div class="stack">
+        ${jnProgress(1)}
+        <div class="jn-hero">
+          <div class="ico">🎟</div>
+          <h2>초대 코드를 받으셨군요!</h2>
+          <p>곡성군민에너지협동조합에서 보낸 가입 초대입니다.</p>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-tt">초대 코드 확인</div><div class="card-sub">SMS·카카오 알림톡으로 받은 6자리 코드 (유효기간 72시간)</div></div>
+          </div>
+          <div class="card-bd">
+            <div class="jn-code">
+              ${code.split('').map((c,i) => `<input value="${c}" readonly tabindex="${i+1}" aria-label="code-${i+1}">`).join('')}
+            </div>
+            <div class="jn-code-lbl">✓ 유효한 초대 코드예요 · 발송: 곡성군민에너지협동조합 (2026.04.22)</div>
+
+            <div style="margin-top:18px;padding:14px 18px;background:var(--ink-50);border-radius:10px;font-size:12.5px;line-height:1.65;color:var(--ink-700);">
+              <strong style="color:var(--ink-900);">🧭 가입 안내</strong><br>
+              이 코드는 곡성군 주민 중 지자체가 추천한 분께 발송되었어요. 가입은 <strong>본인인증 · 거주지 증빙 · 출자금 납부</strong> 3단계를 모두 마쳐야 완료됩니다.<br>
+              출자금은 <strong>50만원 이상 1,000만원 이하</strong>로 자유롭게 선택 가능해요.
+            </div>
+
+            <div class="jn-foot">
+              <button class="btn-ghost" disabled style="opacity:0.4;">← 이전</button>
+              <div class="rt">
+                <button class="btn-ghost" onclick="bhSwitchLevel('guest')">코드 다시 받기</button>
+                <button class="btn-primary" onclick="jnGoStep(2)">본인인증으로 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  views['join-auth'] = () => {
+    const j = window.__bh.join;
+    const canNext = j.kakaoOk && j.passOk;
+    return `
+      <div class="stack">
+        ${jnProgress(2)}
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-tt">2. 본인인증</div>
+              <div class="card-sub">카카오 로그인 + PASS 휴대폰 본인확인</div>
+            </div>
+            <span class="badge ${canNext?'bd-ok':'bd-warn'}">${canNext?'완료':'진행 필요'}</span>
+          </div>
+          <div class="card-bd">
+            <div class="jn-auth-step ${j.kakaoOk?'done':''}">
+              <div class="ic">💬</div>
+              <div class="meta">
+                <div class="n">카카오 로그인</div>
+                <div class="s">${j.kakaoOk ? '✓ 완료 · yoon****@kakao.com' : '카카오 계정으로 간편 로그인'}</div>
+              </div>
+              <span class="done-tag">완료</span>
+              <button class="jn-btn" onclick="jnKakao()">카카오로 계속</button>
+            </div>
+
+            <div class="jn-auth-step ${j.passOk?'done':''}">
+              <div class="ic">🔐</div>
+              <div class="meta">
+                <div class="n">PASS 휴대폰 본인확인</div>
+                <div class="s">${j.passOk ? '✓ 완료 · 윤○환 (1990년생, 010-****-8721)' : '성함·생년월일·휴대폰 번호 확인'}</div>
+              </div>
+              <span class="done-tag">완료</span>
+              <button class="jn-btn" onclick="jnPass()">PASS 인증 실행</button>
+            </div>
+
+            <div style="margin-top:14px;padding:12px 16px;background:var(--ink-50);border-radius:8px;font-size:11.5px;color:var(--ink-500);line-height:1.6;">
+              ℹ 개인정보는 본인확인 용도로만 사용되고 저장되지 않습니다. 인증 결과(이름·생년·휴대폰 마스킹)만 조합원 데이터베이스에 기록됩니다.
+            </div>
+
+            <div class="jn-foot">
+              <button class="btn-ghost" onclick="jnGoStep(1)">← 이전</button>
+              <div class="rt">
+                <button class="btn-primary" onclick="jnGoStep(3)" ${canNext?'':'disabled'}>거주지 증빙으로 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  views['join-residence'] = () => {
+    const j = window.__bh.join;
+    return `
+      <div class="stack">
+        ${jnProgress(3)}
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-tt">3. 거주지 증빙</div>
+              <div class="card-sub">주민등록 기준 곡성군 거주 확인</div>
+            </div>
+            <span class="badge ${j.residenceOk?'bd-ok':'bd-ink'}">${j.residenceOk?'확인 완료':'조회 필요'}</span>
+          </div>
+          <div class="card-bd">
+            ${!j.residenceOk ? `
+              <div style="padding:24px;text-align:center;background:var(--ink-50);border-radius:10px;">
+                <div style="font-size:13px;color:var(--ink-700);margin-bottom:10px;">행정안전부 주민등록 API로 거주지 자동 조회</div>
+                <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:16px;">
+                  본인인증 정보로 자동 조회 · 수 초 내 완료
+                </div>
+                <button class="btn-primary" onclick="jnResidence()">거주지 자동 조회 ▸</button>
+              </div>
+            ` : `
+              <div style="padding:22px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                  <div style="font-size:32px;">📍</div>
+                  <div style="flex:1;">
+                    <div style="font-size:11px;color:#047857;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">확인된 거주지</div>
+                    <div style="font-size:18px;font-weight:800;color:#065F46;margin-top:2px;">전라남도 곡성군 삼기면 근촌리</div>
+                    <div style="font-size:12px;color:#047857;margin-top:2px;">주민등록 전입일: 2019-06-10 (약 6.9년 거주)</div>
+                  </div>
+                  <span class="badge bd-ok">✓ 조합원 자격 확인</span>
+                </div>
+              </div>
+              <div style="margin-top:14px;padding:12px 16px;background:var(--ink-50);border-radius:8px;font-size:12px;color:var(--ink-700);">
+                <strong>💡 거리 등급 자동 산정</strong> — 발전소 기준 1km 이내 → <strong style="color:var(--blue-700);">인근 (× 1.0배 배당 가중치)</strong>
+              </div>
+            `}
+
+            <div class="jn-foot">
+              <button class="btn-ghost" onclick="jnGoStep(2)">← 이전</button>
+              <div class="rt">
+                <button class="btn-primary" onclick="jnGoStep(4)" ${j.residenceOk?'':'disabled'}>출자금 납부로 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  views['join-payment'] = () => {
+    const j = window.__bh.join;
+    const AMTS = [
+      { v: 500000,   l:'50만원',    s:'최소 출자금' },
+      { v: 1000000,  l:'100만원',   s:'추천 ⭐',    rec: true },
+      { v: 3000000,  l:'300만원',   s:'' },
+      { v: 5000000,  l:'500만원',   s:'' },
+      { v: 10000000, l:'1,000만원', s:'최대 한도' },
+    ];
+    return `
+      <div class="stack">
+        ${jnProgress(4)}
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-tt">4. 출자금 납부</div>
+              <div class="card-sub">조합원이 되면 예상 연 배당률 약 9.2% (× 거리 가중치 1.0배)</div>
+            </div>
+          </div>
+          <div class="card-bd">
+            <div style="font-size:12.5px;font-weight:600;color:var(--ink-700);margin-bottom:8px;">출자금액</div>
+            <div class="jn-amounts">
+              ${AMTS.map(a => `
+                <button class="jn-amount ${j.amount===a.v?'on':''}" onclick="jnSetAmt(${a.v})">
+                  <div class="v">${a.l}</div>
+                  ${a.rec ? '<div class="rec">RECOMMEND</div>' : a.s ? `<div class="s">${a.s}</div>` : '<div class="s">&nbsp;</div>'}
+                </button>
+              `).join('')}
+            </div>
+
+            <div style="padding:14px 18px;background:var(--blue-50);border:1px solid #bfdbfe;border-radius:10px;margin-bottom:18px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);margin-bottom:4px;"><span>선택 금액</span><strong style="color:var(--ink-900);">${j.amount.toLocaleString()} 원</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);margin-bottom:4px;"><span>예상 연 배당 (9.2% × 1.0배)</span><strong style="color:var(--blue-700);">${Math.round(j.amount * 0.092).toLocaleString()} 원</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-700);"><span>수령 방식</span><strong style="color:var(--ink-900);">곡성사랑상품권 (+3% 가산)</strong></div>
+            </div>
+
+            <div style="font-size:12.5px;font-weight:600;color:var(--ink-700);margin-bottom:8px;">납부 방법</div>
+            <div class="jn-pay-methods">
+              <div class="jn-pay-method ${j.method==='transfer'?'on':''}" onclick="jnSetMethod('transfer')">
+                <div class="ti">💸 계좌이체 (즉시)</div>
+                <div class="de">본인 계좌에서 조합 계좌로 바로 송금</div>
+              </div>
+              <div class="jn-pay-method ${j.method==='vacct'?'on':''}" onclick="jnSetMethod('vacct')">
+                <div class="ti">🏦 가상계좌 (자동 감지)</div>
+                <div class="de">전용 가상계좌 발급 · 입금 시 자동 확인</div>
+              </div>
+            </div>
+
+            ${j.method==='vacct' ? `
+              <div class="jn-vacct">[전용 가상계좌]
+은행 : 농협<span style="margin-left:8px;color:#94A3B8">NH</span>
+<span class="acct">352-9004-${String(Math.floor(Math.random()*9999)).padStart(4,'0')}-${String(Math.floor(Math.random()*99)).padStart(2,'0')}</span>
+예금주 : 곡성군민에너지협동조합
+금액 : <strong>${j.amount.toLocaleString()} 원</strong>
+유효 : <strong>24시간</strong> (이후 재발급)
+</div>` : `
+              <div style="padding:14px 18px;background:var(--ink-50);border-radius:10px;font-size:12px;color:var(--ink-600);">
+                본인 명의 계좌에서 <strong style="color:var(--ink-900);">곡성군민에너지협동조합 (농협 352-0001-1234-00)</strong> 으로 ${j.amount.toLocaleString()}원 이체 후 "납부 완료" 버튼을 눌러주세요.
+              </div>
+            `}
+
+            <div class="jn-foot">
+              <button class="btn-ghost" onclick="jnGoStep(3)">← 이전</button>
+              <div class="rt">
+                <button class="btn-primary" onclick="jnComplete()">${j.method==='transfer'?'✓ 납부 완료 →':'가상계좌 발급 · 입금 대기 →'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  views['join-done'] = () => {
+    const j = window.__bh.join;
+    const newMemberNo = '1248';
+    return `
+      <div class="stack">
+        ${jnProgress(5)}
+        <div class="jn-done">
+          <div class="big-ic">🎉</div>
+          <h2>환영합니다, 조합원이 되셨어요!</h2>
+          <p>곡성군민에너지협동조합의 ${newMemberNo}번째 조합원이 되셨습니다.</p>
+
+          <div class="member-card">
+            <div class="l">조합원 번호</div>
+            <div class="v">#${newMemberNo}</div>
+            <div style="display:flex;gap:24px;margin-top:12px;">
+              <div><div class="l">출자금</div><div style="font-size:14px;font-weight:700;color:var(--ink-900);">${j.amount.toLocaleString()} 원</div></div>
+              <div><div class="l">거리 등급</div><div style="font-size:14px;font-weight:700;color:var(--blue-700);">인근 · × 1.0배</div></div>
+              <div><div class="l">가입일</div><div style="font-size:14px;font-weight:700;color:var(--ink-900);">2026.04.23</div></div>
+            </div>
+          </div>
+
+          <div>
+            <button class="btn-primary" onclick="bhSwitchLevel('member')" style="padding:12px 28px;font-size:14px;">조합원 메인으로 →</button>
+          </div>
+
+          <div style="margin-top:28px;padding:14px 18px;background:#fff;border-radius:10px;font-size:11.5px;color:var(--ink-500);max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;">
+            💡 카카오 알림톡으로 가입 확인 메시지와 조합원 증서(PDF)가 곧 도착해요.<br>
+            총회 안건이 올라오면 앱 알림으로 확인하실 수 있어요.
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  // ─── 가입 플로우 액션 ─────────────────────
+  function jnKakao() {
+    window.__bh.join.kakaoOk = true;
+    toast && toast('✓ 카카오 로그인 완료');
+    go('join-auth');
+  }
+  function jnPass() {
+    window.__bh.join.passOk = true;
+    toast && toast('✓ PASS 본인확인 완료 (윤○환 님)');
+    go('join-auth');
+  }
+  function jnResidence() {
+    setTimeout(() => {
+      window.__bh.join.residenceOk = true;
+      toast && toast('✓ 거주지 확인 완료 — 삼기면 근촌리');
+      go('join-residence');
+    }, 400);
+    toast && toast('행정 API 조회 중...');
+  }
+  function jnSetAmt(v) { window.__bh.join.amount = v; go('join-payment'); }
+  function jnSetMethod(m) { window.__bh.join.method = m; go('join-payment'); }
+  function jnComplete() {
+    if (window.__bh.join.method === 'vacct') {
+      toast && toast('가상계좌 발급 완료 · 입금 확인 시뮬레이션');
+      setTimeout(() => { toast && toast('✓ 입금 확인됨'); jnGoStep(5); }, 900);
+    } else {
+      toast && toast('✓ 납부 확인됨');
+      setTimeout(() => jnGoStep(5), 400);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // coop-onboard (운영자 대량 명단 등록 — 간소화 유지)
+  // ═══════════════════════════════════════════════════
+  window.__ob = { step: 1, method: 'sms', sent: false };
+  views['coop-onboard'] = () => {
+    const s = window.__ob.step;
+    return `
+      <div class="stack">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-tt">조합원 온보딩 · 대량 등록</div>
+              <div class="card-sub">지자체로부터 받은 조합원 명단(엑셀)을 업로드 → 초대 발송 → 가입 모니터링 → 자격 확정</div>
+            </div>
+            <span class="badge bd-warn">CORP_ADMIN 전용</span>
+          </div>
+          <div class="card-bd">
+            <div class="ob-steps">
+              <button class="${s===1?'current':s>1?'done':''}" onclick="obStep(1)"><span class="n">1</span>엑셀 업로드</button>
+              <button class="${s===2?'current':s>2?'done':''}" onclick="obStep(2)"><span class="n">2</span>초대 발송</button>
+              <button class="${s===3?'current':s>3?'done':''}" onclick="obStep(3)"><span class="n">3</span>가입 모니터링</button>
+              <button class="${s===4?'current':''}"            onclick="obStep(4)"><span class="n">4</span>자격 확정</button>
+            </div>
+
+            <div class="ob-panel ${s===1?'active':''}">
+              <div class="ob-drop">
+                <div class="ob-drop-ic">⬆</div>
+                <div class="ob-drop-title">엑셀 파일을 드래그하거나 클릭하여 업로드</div>
+                <div class="ob-drop-sub">.xlsx · 최대 5,000행 · 필수열: 성명 | 전화번호 | 주소 | 전입일</div>
+              </div>
+              <div style="margin-top:14px;font-size:12px;color:var(--ink-500);">
+                총 47건 · 유효 46건 · 오류 1건 (전화번호 형식)
+              </div>
+              <div class="jn-foot">
+                <div></div>
+                <button class="btn-primary" onclick="obStep(2)">다음: 발송 확인 →</button>
+              </div>
+            </div>
+
+            <div class="ob-panel ${s===2?'active':''}">
+              <div class="ob-summary-grid">
+                <div class="ob-summary-cell"><div class="l">업로드</div><div class="v">47<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">유효</div><div class="v" style="color:var(--ok);">46<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">오류 (제외)</div><div class="v" style="color:#d97706;">1<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">발송 대상</div><div class="v" style="color:var(--blue-700);">46<span class="u">명</span></div></div>
+              </div>
+              <div style="margin-top:16px;padding:16px;background:#0F172A;color:#e2e8f0;border-radius:10px;font-family:monospace;font-size:12px;line-height:1.75;white-space:pre-line;">[루트에너지] 곡성 군민 에너지 협동조합 가입 초대
+
+가입 링크: https://app.rootenergy.co.kr/join?code=ABC123
+인증코드: ABC123 (72시간 유효)
+
+문의: 061-000-0000</div>
+              <div class="jn-foot">
+                <button class="btn-ghost" onclick="obStep(1)">← 이전</button>
+                <div class="rt">
+                  <button class="btn-primary" onclick="obSendAll()">${window.__ob.sent?'✓ 발송됨':'46명에게 발송 →'}</button>
+                  ${window.__ob.sent?'<button class="btn-primary" onclick="obStep(3)">다음: 현황 →</button>':''}
+                </div>
+              </div>
+            </div>
+
+            <div class="ob-panel ${s===3?'active':''}">
+              <div class="ob-summary-grid">
+                <div class="ob-summary-cell"><div class="l">발송 완료</div><div class="v">46<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">가입 완료</div><div class="v" style="color:var(--ok);">31<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">출자금 납입</div><div class="v" style="color:var(--blue-700);">28<span class="u">명</span></div></div>
+                <div class="ob-summary-cell"><div class="l">미가입</div><div class="v" style="color:#d97706;">15<span class="u">명</span></div></div>
+              </div>
+              <div style="margin-top:14px;font-size:12px;color:var(--ink-500);">
+                표/재발송/엑셀 내보내기 기능 — 실 구현 시 참조.
+              </div>
+              <div class="jn-foot">
+                <button class="btn-ghost" onclick="obStep(2)">← 이전</button>
+                <button class="btn-primary" onclick="obStep(4)">다음: 자격 확정 →</button>
+              </div>
+            </div>
+
+            <div class="ob-panel ${s===4?'active':''}">
+              <div style="padding:14px 18px;background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;font-size:12.5px;color:#78350f;margin-bottom:14px;">
+                ℹ <strong>전입일 기준 거리 등급 자동 산정</strong> — 행정 API 조회 또는 엑셀 일괄 입력
+              </div>
+              <div class="ob-summary-grid" style="grid-template-columns:repeat(3,1fr);">
+                <div class="ob-summary-cell" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2);"><div class="l">인접 (500m 이내)</div><div class="v" style="color:var(--ok);">18<span class="u">명 · × 1.2배</span></div></div>
+                <div class="ob-summary-cell" style="background:var(--blue-50);border-color:#bfdbfe;"><div class="l">인근 (500m~1km)</div><div class="v" style="color:var(--blue-700);">9<span class="u">명 · × 1.0배</span></div></div>
+                <div class="ob-summary-cell"><div class="l">일반 (1km 초과)</div><div class="v">4<span class="u">명 · × 0.8배</span></div></div>
+              </div>
+              <div class="jn-foot">
+                <button class="btn-ghost" onclick="obStep(3)">← 이전</button>
+                <button class="btn-primary" onclick="obFinal()">자격 확정 및 ACTIVE 전환 (31명) ▸</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+  function obStep(n) { window.__ob.step = n; go('coop-onboard'); }
+  function obSendAll() {
+    window.__ob.sent = true;
+    toast && toast('✓ 46명에게 SMS·카카오 알림톡 발송 완료');
+    go('coop-onboard');
+  }
+  function obFinal() {
+    toast && toast('✓ 31명 ACTIVE 전환 — 블록체인 원장 기록 완료');
+  }
+
+  // ═══════════════════════════════════════════════════
+  // toast 폴리필
+  // ═══════════════════════════════════════════════════
+  if (typeof window.toast !== 'function') {
+    window.toast = function (msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:100px;font-size:13px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.2s;';
+      document.body.appendChild(el);
+      requestAnimationFrame(() => el.style.opacity = '1');
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 2000);
+    };
+  }
+
+  // ═══════════════════════════════════════════════════
+  // 부팅 — 기본 레벨 = guest, 기본 뷰 = join-code
+  // ═══════════════════════════════════════════════════
+  bhSwitchLevel('guest');
+</script>
+
+</body>
+</html>
